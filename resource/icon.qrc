@@ -1,0 +1,62 @@
+<RCC>
+    <qresource prefix="/sequence">
+        <file alias="01210">icon/sequence/01210.png</file>
+        <file alias="0120">icon/sequence/0120.png</file>
+    </qresource>
+    <qresource prefix="/scrolling">
+        <file alias="self">icon/scrolling/self_scrolling.png</file>
+        <file alias="parallax">icon/scrolling/camera_scrolling.png</file>
+    </qresource>
+    <qresource prefix="/layer">
+        <file alias="low">icon/layer/low.png</file>
+        <file alias="intermediate">icon/layer/intermediate.png</file>
+        <file alias="high">icon/layer/high.png</file>
+    </qresource>
+    <qresource prefix="/ground">
+        <file alias="water_top_right">icon/ground/water_top_right.png</file>
+        <file alias="water_top_left">icon/ground/water_top_left.png</file>
+        <file alias="water_bottom_right">icon/ground/water_bottom_right.png</file>
+        <file alias="water_bottom_left">icon/ground/water_bottom_left.png</file>
+        <file alias="wall_top_right">icon/ground/wall_top_right.png</file>
+        <file alias="wall_top_left">icon/ground/wall_top_left.png</file>
+        <file alias="wall_bottom_right">icon/ground/wall_bottom_right.png</file>
+        <file alias="wall_bottom_left">icon/ground/wall_bottom_left.png</file>
+        <file alias="wall">icon/ground/wall.png</file>
+        <file alias="traversable">icon/ground/traversable.png</file>
+        <file alias="shallow_water">icon/ground/shallow_water.png</file>
+        <file alias="prickles">icon/ground/prickles.png</file>
+        <file alias="lava">icon/ground/lava.png</file>
+        <file alias="ladder">icon/ground/ladder.png</file>
+        <file alias="hole">icon/ground/hole.png</file>
+        <file alias="empty">icon/ground/empty.png</file>
+        <file alias="deep_water">icon/ground/deep_water.png</file>
+    </qresource>
+    <qresource prefix="/direction">
+        <file alias="vertical">icon/direction/vertical.png</file>
+        <file alias="horizontal">icon/direction/horizontal.png</file>
+    </qresource>
+    <qresource prefix="/other">
+        <file alias="none">icon/other/none.png</file>
+    </qresource>
+    <qresource prefix="/fugue">
+        <file alias="arrow_up">icon/arrow-090.png</file>
+        <file alias="arrow_down">icon/arrow-270.png</file>
+        <file alias="box">icon/box.png</file>
+        <file alias="minus">icon/minus.png</file>
+        <file alias="plus">icon/plus.png</file>
+        <file alias="file">icon/document.png</file>
+        <file alias="dir">icon/folder-horizontal.png</file>
+        <file alias="redo">icon/arrow-curve.png</file>
+        <file alias="undo">icon/arrow-curve-180-left.png</file>
+        <file alias="save">icon/disk-return-black.png</file>
+    </qresource>
+    <qresource prefix="/media">
+        <file alias="next">icon/media/arrow.png</file>
+        <file alias="prev">icon/media/arrow-180.png</file>
+        <file alias="play">icon/media/control.png</file>
+        <file alias="pause">icon/media/control-pause.png</file>
+        <file alias="last">icon/media/control-stop.png</file>
+        <file alias="first">icon/media/control-stop-180.png</file>
+        <file alias="stop">icon/media/control-stop-square.png</file>
+    </qresource>
+</RCC>
