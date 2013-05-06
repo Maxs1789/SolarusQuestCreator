@@ -33,6 +33,7 @@ SpriteAnimationEditor::SpriteAnimationEditor (Quest *quest) :
     _quest(quest),
     _directory(quest->dataDirectory() + "sprites/")
 {
+    setEnabled(false);
     _initWidgets();
     connect(_imageButton, SIGNAL(clicked()), this, SLOT(_findImage()));
     connect(

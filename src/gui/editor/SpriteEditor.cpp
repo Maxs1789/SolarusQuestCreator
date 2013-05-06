@@ -40,12 +40,13 @@
 SpriteEditor::SpriteEditor (Quest *quest, const Sprite &sprite) :
     Editor(quest->directory(), SPRITE, sprite.id()),
     _quest(quest),
-    _sprite(new Sprite(""))
+    _sprite(new Sprite("")),
+    _animCount(0)
 {
     *_sprite = sprite;
     _sprite->attach(this);
     _initWidgets();
-    _refreshWidgets();
+    _firstRefresh();
     try {
         _sprite->setSelection(_animations->currentText());
     } catch (const SQCException &ex) {}
@@ -74,123 +75,73 @@ void SpriteEditor::simpleRefresh (QString message)
 
 void SpriteEditor::refreshSelection (const SpriteSelection &selection)
 {
-    if (!selection.isEmpty()) {
+    bool empty = selection.isEmpty();
+    if (!empty) {
         int n = _animations->findText(selection.animation());
         _animations->blockSignals(true);
-        _animationEditor->setEnabled(true);
-        _animations->setEnabled(true);
         _animations->setCurrentIndex(n);
-        _animations->blockSignals(false);
         refreshAnimation(selection.animation());
-    } else if (_sprite->animationNames().size() == 0) {
-        _animationEditor->setEnabled(false);
-        _animations->setEnabled(false);
+        _animations->blockSignals(false);
     }
-    _removeAnimationButton->setEnabled(!selection.isEmpty());
+    _removeAnimationButton->setEnabled(!empty);
+    _animationEditor->setEnabled(!empty);
+    _animations->setEnabled(!empty);
 }
 
 void SpriteEditor::refreshAnimation (const QString &name)
 {
-    _refreshTitle();
     SpriteAnimation animation = _sprite->animation(name);
-    QString img_path = animation.image();
-    if (img_path == "tileset") {
-        img_path = _quest->dataDirectory() + "tilesets/";
-        img_path += _animationEditor->tileset() + ".entities.png";
-    } else {
-        img_path = _quest->dataDirectory() + "sprites/" + img_path;
-    }
-    QPixmap img(img_path);
-    _graphicsView->scene()->clear();
-    _graphicsView->scene()->addItem(new QGraphicsPixmapItem(img));
-    _graphicsView->scene()->setSceneRect(img.rect());
     SpriteSelection selection = _sprite->selection();
-    if (!selection.isEmpty() && selection.animation() == name) {
-        _animationGroup->setEnabled(true);
-        _directions->setEnabled(true);
+    bool enableAnim = !selection.isEmpty() && selection.animation() == name;
+    bool enableDir = enableAnim && selection.haveDirection();
+
+    _setCurrentImage(animation.image());
+
+    _animationGroup->setEnabled(enableAnim);
+    _graphicsView->setEnabled(enableAnim);
+    _directions->setEnabled(enableAnim);
+    _directionEditor->setEnabled(enableDir);
+    _directionPreview->setEnabled(enableDir);
+    _removeDirectionButton->setEnabled(enableDir);
+    _upDirectionButton->setEnabled(enableDir);
+    _downDirectionButton->setEnabled(enableDir);
+
+    if (enableAnim) {
         _animationEditor->setAnimation(animation);
-        _directions->blockSignals(true);
-        _directions->clear();
-        int mw = 16, mh = 16;
-        for (int i = 0; i < animation.countDirections(); i++) {
-            SpriteDirection direction = animation.direction(i);
-            QPixmap pix = img.copy(
-                direction.x(), direction.y(),
-                direction.width(), direction.height()
-            );
-            if (pix.width() > mw) {
-                mw = pix.width();
-            }
-            if (pix.height() > mh) {
-                mh = pix.height();
-            }
-            QString str = QString::number(i);
-            switch (i) {
-            case 0: str += tr(" - right"); break;
-            case 1: str += tr(" - up"); break;
-            case 2: str += tr(" - left"); break;
-            case 3: str += tr(" - down"); break;
-            }
-            QListWidgetItem *item = new QListWidgetItem(QIcon(pix), str);
-            item->setData(QListWidgetItem::UserType, i);
-            _directions->addItem(item);
-        }
-        _directions->setIconSize(QSize(
-            mw <= 128 ? mw : 128, mh <= 128 ? mh : 128
-        ));
-        if (selection.haveDirection()) {
+        _refreshGraphicsView(animation, selection);
+        _refreshDirections(animation.allDirections());
+        if (enableDir) {
             int dir = selection.direction();
             SpriteDirection direction = animation.direction(dir);
-            int w = direction.width(), h = direction.height();
-            QPen pen(Qt::blue);
-            for (int i = 0; i < direction.nbFrames(); i++) {
-                int x = direction.x(), y = direction.y();
-                int col = i % direction.nbColumns();
-                int row = i / direction.nbColumns();
-                x += col * w;
-                y += row * h;
-                _graphicsView->scene()->addRect(x, y, w, h, pen);
-            }
-            _directions->setCurrentRow(dir);
-            _directionEditor->setEnabled(true);
-            _directionPreview->setEnabled(true);
-            _removeDirectionButton->setEnabled(true);
-            _upDirectionButton->setEnabled(dir > 0);
-            _downDirectionButton->setEnabled(
-                dir + 1 < animation.countDirections()
-            );
-            _directionEditor->setDirection(direction);
-            _directionPreview->setImage(img);
-            _directionPreview->setFrameDelay(animation.frameDelay());
-            _directionPreview->setFrameOnLoop(animation.frameOnLoop());
-            _directionPreview->setDirection(animation.direction(dir));
-        } else {
-            _directionEditor->setEnabled(false);
-            _directionPreview->setEnabled(false);
-            _removeDirectionButton->setEnabled(false);
-            _upDirectionButton->setEnabled(false);
-            _downDirectionButton->setEnabled(false);
+            _refreshDirectionEditor(dir, direction);
+            _refreshDirectionPreview(animation, direction);
         }
-        _directions->blockSignals(false);
-    } else {
-        _animationGroup->setEnabled(false);
-        _directions->setEnabled(false);
-        _directionEditor->setEnabled(false);
-        _removeDirectionButton->setEnabled(false);
-        _upDirectionButton->setEnabled(false);
-        _downDirectionButton->setEnabled(false);
     }
+    _refreshTitle();
 }
 
 void SpriteEditor::addAnimation (const QString &name)
 {
+    _animations->blockSignals(true);
     _animations->addItem(name, name);
+    _animations->blockSignals(false);
+    refreshSelection(_sprite->selection());
     _refreshTitle();
 }
 
 void SpriteEditor::removeAnimation (const QString &name)
 {
-    _animations->removeItem(_animations->findData(name));
+    int n = _animations->findData(name);
+    if (n >= 0) {
+        if (_animations->count() > 1) {
+            _animations->removeItem(n);
+        } else {
+            _animations->blockSignals(true);
+            _animations->removeItem(n);
+            _animations->blockSignals(false);
+            refreshSelection(_sprite->selection());
+        }
+    }
     _refreshTitle();
 }
 
@@ -231,7 +182,7 @@ void SpriteEditor::_initWidgets ()
     _directionPreview = new SpriteDirectionPreview;
 
     _animations->setEditable(true);
-    _directionEditor->setEnabled(false);
+    _animations->setEnabled(false);
     _graphicsView->setScene(new QGraphicsScene());
     _graphicsView->setBackgroundBrush(QBrush(Qt::lightGray));
     _addAnimationButton->setMaximumSize(24, 24);
@@ -351,7 +302,7 @@ void SpriteEditor::_connects ()
     connect(_actionRedo, SIGNAL(triggered()), this, SLOT(_redo()));
 }
 
-void SpriteEditor::_refreshWidgets ()
+void SpriteEditor::_firstRefresh ()
 {
     simpleRefresh(Sprite::p_name);
     _id->setText(QString("<b>") + _sprite->id() + "</b>");
@@ -374,6 +325,93 @@ void SpriteEditor::_refreshTitle ()
     _actionSave->setEnabled(_sprite->canUndo());
     _actionUndo->setEnabled(_sprite->canUndo());
     _actionRedo->setEnabled(_sprite->canRedo());
+}
+
+void SpriteEditor::_refreshDirections (const QList<SpriteDirection> &directions)
+{
+    _directions->blockSignals(true);
+    _directions->clear();
+    int mw = 16, mh = 16;
+    for (int i = 0; i < directions.size(); i++) {
+        SpriteDirection direction = directions[i];
+        QPixmap pix = _currentImage.copy(
+            direction.x(), direction.y(),
+            direction.width(), direction.height()
+        );
+        if (pix.width() > mw) {
+            mw = pix.width();
+        }
+        if (pix.height() > mh) {
+            mh = pix.height();
+        }
+        QString str = QString::number(i);
+        switch (i) {
+        case 0: str += tr(" - right"); break;
+        case 1: str += tr(" - up"); break;
+        case 2: str += tr(" - left"); break;
+        case 3: str += tr(" - down"); break;
+        }
+        QListWidgetItem *item = new QListWidgetItem(QIcon(pix), str);
+        item->setData(QListWidgetItem::UserType, i);
+        _directions->addItem(item);
+    }
+    _directions->setIconSize(QSize(
+        mw <= 128 ? mw : 128, mh <= 128 ? mh : 128
+    ));
+    _directions->blockSignals(false);
+}
+
+void SpriteEditor::_setCurrentImage (QString imagePath)
+{
+    if (imagePath == "tileset") {
+        imagePath = _quest->dataDirectory() + "tilesets/";
+        imagePath += _animationEditor->tileset() + ".entities.png";
+    } else {
+        imagePath = _quest->dataDirectory() + "sprites/" + imagePath;
+    }
+    _currentImage.load(imagePath);
+}
+
+void SpriteEditor::_refreshGraphicsView (
+    const SpriteAnimation &animation, const SpriteSelection &selection
+) {
+    _graphicsView->scene()->clear();
+    _graphicsView->scene()->addItem(new QGraphicsPixmapItem(_currentImage));
+    _graphicsView->scene()->setSceneRect(_currentImage.rect());
+    if (selection.haveDirection()) {
+        int dir = selection.direction();
+        SpriteDirection direction = animation.direction(dir);
+        int w = direction.width(), h = direction.height();
+        QPen pen(Qt::blue);
+        for (int i = 0; i < direction.nbFrames(); i++) {
+            int x = direction.x(), y = direction.y();
+            int col = i % direction.nbColumns();
+            int row = i / direction.nbColumns();
+            x += col * w;
+            y += row * h;
+            _graphicsView->scene()->addRect(x, y, w, h, pen);
+        }
+    }
+}
+
+void SpriteEditor::_refreshDirectionEditor (
+    const int &n, const SpriteDirection &direction
+) {
+    _directions->blockSignals(true);
+    _directions->setCurrentRow(n);
+    _directions->blockSignals(false);
+    _upDirectionButton->setEnabled(n > 0);
+    _downDirectionButton->setEnabled(n + 1 < _directions->count());
+    _directionEditor->setDirection(direction);
+}
+
+void SpriteEditor::_refreshDirectionPreview (
+    const SpriteAnimation &animation, const SpriteDirection &direction
+) {
+    _directionPreview->setImage(_currentImage);
+    _directionPreview->setFrameDelay(animation.frameDelay());
+    _directionPreview->setFrameOnLoop(animation.frameOnLoop());
+    _directionPreview->setDirection(direction);
 }
 
 void SpriteEditor::_swapDirection (const int &n1, const int &n2)
@@ -433,16 +471,14 @@ void SpriteEditor::_addAnimation ()
     QString dir = _quest->dataDirectory() + "sprites/";
     ImageFinder finder(this, dir);
     int r = finder.exec();
-    static int n = 0;
     if (r == QDialog::Accepted) {
         QString name;
         do {
-            name = QString("anim_") + QString::number(n++);
+            name = QString("anim_") + QString::number(_animCount++);
         } while (_sprite->animationExists(name));
         QString image = finder.image();
         image.replace(dir, "");
         _sprite->setAnimation(name, SpriteAnimation(name, image));
-        refreshSelection(_sprite->selection());
     }
 }
 

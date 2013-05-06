@@ -72,12 +72,25 @@ private:
     QAction *_actionSave;
     QGroupBox *_animationGroup;
     SpriteDirectionPreview *_directionPreview;
+    int _animCount;
+    QPixmap _currentImage;
 
     void _initWidgets ();
     void _connects ();
-    void _refreshWidgets ();
+    void _firstRefresh ();
 
     void _refreshTitle ();
+    void _refreshDirections (const QList<SpriteDirection> &directions);
+    void _setCurrentImage (QString imagePath);
+    void _refreshGraphicsView (
+        const SpriteAnimation &animation, const SpriteSelection &selection
+    );
+    void _refreshDirectionEditor (
+        const int &n, const SpriteDirection &direction
+    );
+    void _refreshDirectionPreview (
+        const SpriteAnimation &animation, const SpriteDirection &direction
+    );
     void _swapDirection (const int &n1, const int &n2);
 
 private slots:

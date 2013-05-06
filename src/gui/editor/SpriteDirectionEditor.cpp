@@ -24,6 +24,7 @@
 
 SpriteDirectionEditor::SpriteDirectionEditor ()
 {
+    setEnabled(false);
     _initWidgets();
     connect(_x, SIGNAL(editingFinished()), this, SLOT(_xChange()));
     connect(_y, SIGNAL(editingFinished()), this, SLOT(_yChange()));
