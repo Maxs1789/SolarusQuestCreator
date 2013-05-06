@@ -44,8 +44,8 @@ void Editor::closeEvent (QCloseEvent *event)
     if (!isSaved()) {
         int r = QMessageBox::question(
             this, tr("Save resource"),
-            tr("Are you sure you want to close without saving this resource ?"),
-            QMessageBox::Save | QMessageBox::Ok | QMessageBox::Cancel
+            tr("This resource has not been saved, what do you want to do?"),
+            QMessageBox::Cancel | QMessageBox::Save | QMessageBox::Discard
         );
         if (r == QMessageBox::Save) {
             emit save(this);
