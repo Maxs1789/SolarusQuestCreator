@@ -81,6 +81,7 @@ private:
 
     void _refreshTitle ();
     void _refreshDirections (const QList<SpriteDirection> &directions);
+    QString _directionName (const int &dir, const int &n);
     void _setCurrentImage (QString imagePath);
     void _refreshGraphicsView (
         const SpriteAnimation &animation, const SpriteSelection &selection

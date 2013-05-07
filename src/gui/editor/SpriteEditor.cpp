@@ -93,6 +93,11 @@ void SpriteEditor::refreshAnimation (const QString &name)
     SpriteAnimation animation = _sprite->animation(name);
     SpriteSelection selection = _sprite->selection();
     bool enableAnim = !selection.isEmpty() && selection.animation() == name;
+    if (
+        enableAnim && !selection.haveDirection() && animation.countDirections()
+    ) {
+        selection = SpriteSelection(name, 0);
+    }
     bool enableDir = enableAnim && selection.haveDirection();
 
     _setCurrentImage(animation.image());
@@ -196,6 +201,7 @@ void SpriteEditor::_initWidgets ()
     _upDirectionButton->setEnabled(false);
     _downDirectionButton->setEnabled(false);
     _directionPreview->setEnabled(false);
+    _directions->setIconSize(QSize(128, 128));
 
     QFormLayout *propertiesLayout = new QFormLayout;
     propertiesLayout->addRow(tr("Id:"), _id);
@@ -331,34 +337,49 @@ void SpriteEditor::_refreshDirections (const QList<SpriteDirection> &directions)
 {
     _directions->blockSignals(true);
     _directions->clear();
-    int mw = 16, mh = 16;
-    for (int i = 0; i < directions.size(); i++) {
+    int n = directions.size();
+    for (int i = 0; i < n; i++) {
         SpriteDirection direction = directions[i];
         QPixmap pix = _currentImage.copy(
             direction.x(), direction.y(),
             direction.width(), direction.height()
         );
-        if (pix.width() > mw) {
-            mw = pix.width();
-        }
-        if (pix.height() > mh) {
-            mh = pix.height();
-        }
-        QString str = QString::number(i);
-        switch (i) {
-        case 0: str += tr(" - right"); break;
-        case 1: str += tr(" - up"); break;
-        case 2: str += tr(" - left"); break;
-        case 3: str += tr(" - down"); break;
-        }
+        QString str = QString::number(i) + _directionName(i, n);
         QListWidgetItem *item = new QListWidgetItem(QIcon(pix), str);
         item->setData(QListWidgetItem::UserType, i);
         _directions->addItem(item);
     }
-    _directions->setIconSize(QSize(
-        mw <= 128 ? mw : 128, mh <= 128 ? mh : 128
-    ));
     _directions->blockSignals(false);
+}
+
+QString SpriteEditor::_directionName (const int &dir, const int &n)
+{
+    QString r = tr("right"), u = tr("up"), l = tr("left"), d = tr("down");
+    QString ur = tr("up right"), ul = tr("up left"), dl = tr("down left");
+    QString dr = tr("down right"), str;
+    if (n >= 4) {
+        bool gr = n >= 8;
+        if (dir < 4 || (gr && dir < 8)) {
+            str = " - ";
+        }
+        if (dir == 0) {
+            str += r;
+        } else if (dir < 4) {
+            switch (dir) {
+            case 1: str += gr ? ur : u; break;
+            case 2: str += gr ? u : l; break;
+            case 3: str += gr ? ul : d; break;
+            }
+        } else if (gr) {
+            switch (dir) {
+            case 4: str += l; break;
+            case 5: str += dl; break;
+            case 6: str += d; break;
+            case 7: str += dr; break;
+            }
+        }
+    }
+    return str;
 }
 
 void SpriteEditor::_setCurrentImage (QString imagePath)
