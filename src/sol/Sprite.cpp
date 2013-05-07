@@ -226,7 +226,12 @@ void Sprite::onActionNotify (Action *action, SpriteView *view)
         QString name = (
             (SubModelSetter<Sprite, SpriteAnimation, QString>*)action
         )->id();
-        view->refreshAnimation(name);
+        if (_selection.animation() == name) {
+            view->refreshAnimation(name);
+        } else {
+            _selection = SpriteSelection(name);
+            view->refreshSelection(_selection);
+        }
     } else if (type == A_ADD_ANIMATION || type == A_REMOVE_ANIMATION) {
         QString name = ((GroupAction<QString>*)action)->selection().first();
         if (_animations.contains(name)) {
