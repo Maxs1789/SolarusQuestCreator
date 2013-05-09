@@ -27,7 +27,7 @@ class QPushButton;
 class QGraphicsView;
 class QListWidget;
 class QGroupBox;
-class SQCGraphicsView;
+class SpriteGraphicsView;
 class SpriteAnimationEditor;
 class SpriteDirectionEditor;
 class SpriteDirectionPreview;
@@ -57,7 +57,7 @@ private:
     QLabel *_id;
     QLineEdit *_name;
     QComboBox *_animations;
-    SQCGraphicsView *_graphicsView;
+    SpriteGraphicsView *_graphicsView;
     SpriteAnimationEditor *_animationEditor;
     QListWidget *_directions;
     SpriteDirectionEditor *_directionEditor;
@@ -71,6 +71,7 @@ private:
     QAction *_actionRedo;
     QAction *_actionSave;
     QGroupBox *_animationGroup;
+    QGroupBox *_directionGroup;
     SpriteDirectionPreview *_directionPreview;
     int _animCount;
     QPixmap _currentImage;
@@ -83,9 +84,6 @@ private:
     void _refreshDirections (const QList<SpriteDirection> &directions);
     QString _directionName (const int &dir, const int &n);
     void _setCurrentImage (QString imagePath);
-    void _refreshGraphicsView (
-        const SpriteAnimation &animation, const SpriteSelection &selection
-    );
     void _refreshDirectionEditor (
         const int &n, const SpriteDirection &direction
     );
@@ -103,6 +101,7 @@ private slots:
     void _addAnimation ();
     void _removeAnimation ();
     void _directionSelectionChange ();
+    void _directionNewSelection (Rect selection);
     void _directionChange (SpriteDirection direction);
     void _addDirection ();
     void _removeDirection ();

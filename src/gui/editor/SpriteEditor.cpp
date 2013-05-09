@@ -28,7 +28,7 @@
 #include <QToolBar>
 #include <QAction>
 #include <QMessageBox>
-#include "gui/widget/SQCGraphicsView.h"
+#include "gui/widget/SpriteGraphicsView.h"
 #include "gui/editor/SpriteEditor.h"
 #include "gui/editor/SpriteAnimationEditor.h"
 #include "gui/editor/SpriteDirectionEditor.h"
@@ -86,6 +86,8 @@ void SpriteEditor::refreshSelection (const SpriteSelection &selection)
     _removeAnimationButton->setEnabled(!empty);
     _animationEditor->setEnabled(!empty);
     _animations->setEnabled(!empty);
+    _graphicsView->setEnabled(!empty);
+    _directionGroup->setEnabled(!empty);
 }
 
 void SpriteEditor::refreshAnimation (const QString &name)
@@ -94,7 +96,9 @@ void SpriteEditor::refreshAnimation (const QString &name)
     SpriteSelection selection = _sprite->selection();
     bool enableAnim = !selection.isEmpty() && selection.animation() == name;
     if (
-        enableAnim && !selection.haveDirection() && animation.countDirections()
+        enableAnim && !selection.haveDirection() &&
+        !selection.isNewDirection() && animation.countDirections() &&
+        !_addDirectionButton->isChecked()
     ) {
         selection = SpriteSelection(name, 0);
     }
@@ -102,7 +106,6 @@ void SpriteEditor::refreshAnimation (const QString &name)
 
     _setCurrentImage(animation.image());
 
-    _animationGroup->setEnabled(enableAnim);
     _graphicsView->setEnabled(enableAnim);
     _directions->setEnabled(enableAnim);
     _directionEditor->setEnabled(enableDir);
@@ -113,7 +116,7 @@ void SpriteEditor::refreshAnimation (const QString &name)
 
     if (enableAnim) {
         _animationEditor->setAnimation(animation);
-        _refreshGraphicsView(animation, selection);
+        _graphicsView->setSelection(animation, selection);
         _refreshDirections(animation.allDirections());
         if (enableDir) {
             int dir = selection.direction();
@@ -171,7 +174,7 @@ void SpriteEditor::_initWidgets ()
     _id = new QLabel;
     _name = new QLineEdit;
     _animations = new QComboBox;
-    _graphicsView = new SQCGraphicsView;
+    _graphicsView = new SpriteGraphicsView;
     _animationEditor = new SpriteAnimationEditor(_quest);
     _directions = new QListWidget;
     _directionEditor = new SpriteDirectionEditor;
@@ -188,12 +191,12 @@ void SpriteEditor::_initWidgets ()
 
     _animations->setEditable(true);
     _animations->setEnabled(false);
-    _graphicsView->setScene(new QGraphicsScene());
-    _graphicsView->setBackgroundBrush(QBrush(Qt::lightGray));
+    _graphicsView->setMakeSelection(true);
     _addAnimationButton->setMaximumSize(24, 24);
     _removeAnimationButton->setMaximumSize(24, 24);
     _removeAnimationButton->setEnabled(false);
     _addDirectionButton->setMaximumSize(24, 24);
+    _addDirectionButton->setCheckable(true);
     _removeDirectionButton->setMaximumSize(24, 24);
     _upDirectionButton->setMaximumSize(24, 24);
     _downDirectionButton->setMaximumSize(24, 24);
@@ -217,7 +220,7 @@ void SpriteEditor::_initWidgets ()
     animationLayout->setColumnStretch(0, 1);
     _animationGroup->setLayout(animationLayout);
 
-    QGroupBox *directionsGroup = new QGroupBox(tr("Directions"));
+    _directionGroup = new QGroupBox(tr("Directions"));
     QGridLayout *directionsLayout = new QGridLayout;
     directionsLayout->addWidget(_directions, 0, 0, 5, 1);
     directionsLayout->addWidget(_addDirectionButton, 0, 1);
@@ -226,13 +229,13 @@ void SpriteEditor::_initWidgets ()
     directionsLayout->addWidget(_downDirectionButton, 3, 1);
     directionsLayout->setRowStretch(4, 1);
     directionsLayout->setColumnStretch(0, 1);
-    directionsGroup->setLayout(directionsLayout);
+    _directionGroup->setLayout(directionsLayout);
 
     QGridLayout *layout = new QGridLayout;
     layout->addLayout(propertiesLayout, 0, 0, 1, 1, Qt::AlignCenter);
     layout->addWidget(_animationGroup, 1, 0);
     layout->addWidget(_graphicsView, 0, 1, 3, 5);
-    layout->addWidget(directionsGroup, 2, 0, 2, 1);
+    layout->addWidget(_directionGroup, 2, 0, 2, 1);
     layout->addWidget(_directionEditor, 3, 2);
     layout->addWidget(_directionPreview, 3, 4);
 
@@ -285,6 +288,10 @@ void SpriteEditor::_connects ()
     connect(
         _directions, SIGNAL(itemSelectionChanged()),
         this, SLOT(_directionSelectionChange())
+    );
+    connect(
+        _graphicsView, SIGNAL(newSelection(Rect)),
+        this, SLOT(_directionNewSelection(Rect))
     );
     connect(
         _directionEditor, SIGNAL(directionChange(SpriteDirection)),
@@ -391,28 +398,7 @@ void SpriteEditor::_setCurrentImage (QString imagePath)
         imagePath = _quest->dataDirectory() + "sprites/" + imagePath;
     }
     _currentImage.load(imagePath);
-}
-
-void SpriteEditor::_refreshGraphicsView (
-    const SpriteAnimation &animation, const SpriteSelection &selection
-) {
-    _graphicsView->scene()->clear();
-    _graphicsView->scene()->addItem(new QGraphicsPixmapItem(_currentImage));
-    _graphicsView->scene()->setSceneRect(_currentImage.rect());
-    if (selection.haveDirection()) {
-        int dir = selection.direction();
-        SpriteDirection direction = animation.direction(dir);
-        int w = direction.width(), h = direction.height();
-        QPen pen(Qt::blue);
-        for (int i = 0; i < direction.nbFrames(); i++) {
-            int x = direction.x(), y = direction.y();
-            int col = i % direction.nbColumns();
-            int row = i / direction.nbColumns();
-            x += col * w;
-            y += row * h;
-            _graphicsView->scene()->addRect(x, y, w, h, pen);
-        }
-    }
+    _graphicsView->setImage(_currentImage);
 }
 
 void SpriteEditor::_refreshDirectionEditor (
@@ -524,6 +510,25 @@ void SpriteEditor::_directionSelectionChange ()
     }
 }
 
+void SpriteEditor::_directionNewSelection (Rect selection)
+{
+    if (_addDirectionButton->isChecked()) {
+        SpriteAnimation animation;
+        animation= _sprite->animation(_animations->currentText());
+        int dir = animation.addDirection(SpriteDirection(selection));
+        _sprite->setAnimation(animation.name(), animation);
+        _sprite->setSelection(SpriteSelection(animation.name(), dir));
+        _addDirectionButton->setChecked(false);
+    } else {
+        try {
+            SpriteSelection sel(_sprite->selection().animation(), selection);
+            _sprite->setSelection(sel);
+        } catch (const SQCException &ex) {
+            statusBar()->showMessage(ex.message(), 5000);
+        }
+    }
+}
+
 void SpriteEditor::_directionChange (SpriteDirection direction)
 {
     int n = _directions->currentItem()->data(QListWidgetItem::UserType).toInt();
@@ -536,10 +541,32 @@ void SpriteEditor::_directionChange (SpriteDirection direction)
 
 void SpriteEditor::_addDirection ()
 {
+    if (_addDirectionButton->isChecked()) {
+        SpriteSelection selection = _sprite->selection();
+        if (selection.isNewDirection()) {
+            SpriteAnimation animation;
+            animation= _sprite->animation(selection.animation());
+            int dir = animation.addDirection(
+                SpriteDirection(selection.newDirection())
+            );
+            _sprite->setAnimation(animation.name(), animation);
+            _sprite->setSelection(SpriteSelection(animation.name(), dir));
+            _addDirectionButton->setChecked(false);
+        } else {
+            try {
+                selection = SpriteSelection(_sprite->selection().animation());
+                _sprite->setSelection(selection);
+            } catch (const SQCException &ex) {
+                statusBar()->showMessage(ex.message(), 5000);
+            }
+        }
+    }
+    /*
     SpriteAnimation animation = _sprite->animation(_animations->currentText());
     int dir = animation.addDirection(SpriteDirection());
     _sprite->setAnimation(animation.name(), animation);
     _sprite->setSelection(SpriteSelection(animation.name(), dir));
+    */
 }
 
 void SpriteEditor::_removeDirection ()

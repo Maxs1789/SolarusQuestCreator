@@ -14,13 +14,13 @@
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
-#include <QGraphicsView>
 #include <QLabel>
 #include <QPushButton>
 #include <QGridLayout>
 #include <QGraphicsPixmapItem>
 #include <QEvent>
 #include "gui/widget/SpriteDirectionPreview.h"
+#include "gui/widget/SQCGraphicsView.h"
 
 SpriteDirectionPreview::SpriteDirectionPreview () :
     _currentFrame(0),
@@ -68,7 +68,7 @@ void SpriteDirectionPreview::changeEvent (QEvent *event)
 
 void SpriteDirectionPreview::_initWidgets ()
 {
-    _graphicsView = new QGraphicsView;
+    _graphicsView = new SQCGraphicsView;
     _frame = new QLabel;
     _play = new QPushButton(QIcon(":media/play"), "");
     _next = new QPushButton(QIcon(":media/next"), "");

@@ -18,6 +18,7 @@
 #define SPRITE_DIRECTION_H
 
 #include "exception/SQCException.h"
+#include "sol/types.h"
 
 /**
  * @brief Direction d'une animation d'un Sprite (SpriteAnimation).
@@ -41,6 +42,17 @@ public:
         int x = 0, int y = 0, int width = 24, int height = 24,
         int originX = 12, int originY = 12, int nbFrames = 1, int nbColumns = 1
     ) throw (SQCException);
+    /**
+     * @brief Constructeur d'une direction d'animation.
+     *
+     * @param dimension Les dimensions de la direction
+     * @param originX   La coordonnée x de l'origine
+     * @param originY   La coordonnée y de l'origine
+     * @param nbFrames  Le nombre de frames
+     * @param nbColumns Le nombre de colonnes
+     */
+    SpriteDirection (Rect dimension, int nbFrames = 1, int nbColumns = 1)
+        throw (SQCException);
     /**
      * @brief Opérateur de différence d'un direction.
      *

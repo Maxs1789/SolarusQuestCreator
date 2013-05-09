@@ -21,9 +21,9 @@
 #include <QTimer>
 #include "sol/SpriteDirection.h"
 
-class QGraphicsView;
 class QPushButton;
 class QLabel;
+class SQCGraphicsView;
 
 class SpriteDirectionPreview : public QWidget
 {
@@ -42,7 +42,7 @@ protected:
 private:
     QPixmap _pix;
     SpriteDirection _direction;
-    QGraphicsView *_graphicsView;
+    SQCGraphicsView *_graphicsView;
     QLabel *_frame;
     QPushButton *_play;
     QPushButton *_next;

@@ -38,6 +38,25 @@ SpriteDirection::SpriteDirection (
     _checkNbColumns(nbColumns);
 }
 
+SpriteDirection::SpriteDirection (Rect dimension, int nbFrames, int nbColumns)
+    throw (SQCException) :
+    _x(dimension.x),
+    _y(dimension.y),
+    _width(dimension.width),
+    _height(dimension.height),
+    _originX(dimension.width / 2),
+    _originY(dimension.height / 2),
+    _nbFrames(nbFrames),
+    _nbColumns(nbColumns)
+{
+    _checkX(_x);
+    _checkY(_y);
+    _checkWidth(_width);
+    _checkHeight(_height);
+    _checkNbFrames(nbFrames);
+    _checkNbColumns(nbColumns);
+}
+
 bool SpriteDirection::operator!= (const SpriteDirection &other)
 {
     return other._x        != _x        || other._y         != _y
