@@ -18,44 +18,74 @@
 #define SQC_GRAPHICS_VIEW_H
 
 #include <QGraphicsView>
-#include <QKeyEvent>
-#include <QWheelEvent>
 #include <QScrollBar>
 #include <QApplication>
-
-#include <QDebug>
+#include "sol/types.h"
 
 class SQCGraphicsView : public QGraphicsView
 {
     Q_OBJECT
 public:
-    SQCGraphicsView () {}
+    SQCGraphicsView ();
+
+    void setMakeSelection (bool canMake);
 
 protected:
-
-    void wheelEvent (QWheelEvent *event)
+    struct ComplexSelection
     {
-        if (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier)) {
-            int v = horizontalScrollBar()->value();
-            horizontalScrollBar()->setValue(v - event->delta());
-        } else if (
-            QApplication::keyboardModifiers().testFlag(Qt::ControlModifier)
-        ) {
-            QTransform tran;
-            float zoom = transform().m11();
-            if (event->delta() < 0) {
-                if (zoom > 1) {
-                    zoom /= 1.25;
-                }
-            } else if (zoom < 8) {
-                zoom *= 1.25;
-            }
-            tran.scale(zoom, zoom);
-            setTransform(tran);
-        } else {
-            QGraphicsView::wheelEvent(event);
-        }
+        Rect rect;
+        int length;
+        int cols;
+    };
+
+    void mouseMoveEvent (QMouseEvent *event);
+    void mousePressEvent (QMouseEvent *event);
+    void mouseReleaseEvent (QMouseEvent *event);
+    void paintEvent (QPaintEvent *event);
+    void wheelEvent (QWheelEvent *event);
+
+    void clear ();
+
+    void setNewSelection (Rect selection);
+    void keepSelection ();
+    void addToSelection (const ComplexSelection &selection);
+
+    virtual bool clickOnItems (QList<QGraphicsItem *> items) {
+        return false;
     }
+    virtual void onSelection (const Rect &selection) {
+        keepSelection();
+    }
+
+private:
+    float _zoom, _zoomMin, _zoomMax;
+    int _zoomFactor;
+    bool _canMakeSelection;
+    bool _inSelection;
+    bool _keepSelection;
+    Rect _selection;
+    int _x1, _y1, _x2, _y2;
+    int _gridW, _gridH;
+    QList<ComplexSelection> _selections;
+
+    void _computeSelection ();
+    void _snapToGrid (int &x, int &y, const bool &ceil = false);
+    void _drawNewSelection (QPainter *painter, const Rect &selection);
+    void _drawComplexSelection (
+        QPainter *painter, const ComplexSelection &selection
+    );
+    QPolygonF _complexSelectionBorder(const ComplexSelection &selection);
+    QList<QLineF> _complexSelectionVerticalLines(
+        const ComplexSelection &selection
+    );
+    QList<QLineF> _complexSelectionHorizontalLines (
+        const ComplexSelection &selection
+    );
+    void _getBorderShadows (
+        const QPolygonF &polygon, QPolygonF &shadow1, QPolygonF &shadow2
+    );
+    QList<QLineF> _getVerticalLinesShadows(const QList<QLineF> &lines);
+    QList<QLineF> _getHorizontalLinesShadows(const QList<QLineF> &lines);
 };
 
 #endif
