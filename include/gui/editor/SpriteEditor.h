@@ -27,6 +27,7 @@ class QPushButton;
 class QGraphicsView;
 class QListWidget;
 class QGroupBox;
+class ColorButton;
 class SpriteGraphicsView;
 class SpriteAnimationEditor;
 class SpriteDirectionEditor;
@@ -75,6 +76,7 @@ private:
     SpriteDirectionPreview *_directionPreview;
     int _animCount;
     QPixmap _currentImage;
+    ColorButton *_colorButton;
 
     void _initWidgets ();
     void _connects ();
@@ -91,6 +93,7 @@ private:
         const SpriteAnimation &animation, const SpriteDirection &direction
     );
     void _swapDirection (const int &n1, const int &n2);
+    void _addDirection (Rect selection);
 
 private slots:
     void _nameChange ();

@@ -36,6 +36,7 @@
 #include "sol/SpriteAnimation.h"
 #include "gui/dialog/ImageFinder.h"
 #include "gui/widget/SpriteDirectionPreview.h"
+#include "gui/widget/ColorButton.h"
 
 SpriteEditor::SpriteEditor (Quest *quest, const Sprite &sprite) :
     Editor(quest->directory(), SPRITE, sprite.id()),
@@ -252,6 +253,8 @@ void SpriteEditor::_initWidgets ()
     _actionSave = t->addAction(QIcon(":fugue/save"), "");
     _actionUndo = t->addAction(QIcon(":fugue/undo"), "");
     _actionRedo = t->addAction(QIcon(":fugue/redo"), "");
+    _colorButton = new ColorButton(Qt::white);
+    t->addWidget(_colorButton);
     t->setMovable(false);
 
     _actionSave->setEnabled(false);
@@ -313,6 +316,10 @@ void SpriteEditor::_connects ()
     connect(_actionSave, SIGNAL(triggered()), this, SLOT(_save()));
     connect(_actionUndo, SIGNAL(triggered()), this, SLOT(_undo()));
     connect(_actionRedo, SIGNAL(triggered()), this, SLOT(_redo()));
+    connect(
+        _colorButton, SIGNAL(colorChange(QColor)),
+        _graphicsView, SLOT(setSelectionColor(QColor))
+    );
 }
 
 void SpriteEditor::_firstRefresh ()
@@ -433,6 +440,20 @@ void SpriteEditor::_swapDirection (const int &n1, const int &n2)
     }
 }
 
+void SpriteEditor::_addDirection (Rect selection)
+{
+    try {
+        SpriteAnimation animation;
+        animation= _sprite->animation(_animations->currentText());
+        int dir = animation.addDirection(SpriteDirection(selection));
+        _sprite->setAnimation(animation.name(), animation);
+        _sprite->setSelection(SpriteSelection(animation.name(), dir));
+        _addDirectionButton->setChecked(false);
+    } catch (const SQCException &ex) {
+        statusBar()->showMessage(ex.message(), 5000);
+    }
+}
+
 void SpriteEditor::_nameChange ()
 {
     _sprite->setName(_name->text());
@@ -513,12 +534,7 @@ void SpriteEditor::_directionSelectionChange ()
 void SpriteEditor::_directionNewSelection (Rect selection)
 {
     if (_addDirectionButton->isChecked()) {
-        SpriteAnimation animation;
-        animation= _sprite->animation(_animations->currentText());
-        int dir = animation.addDirection(SpriteDirection(selection));
-        _sprite->setAnimation(animation.name(), animation);
-        _sprite->setSelection(SpriteSelection(animation.name(), dir));
-        _addDirectionButton->setChecked(false);
+        _addDirection(selection);
     } else {
         try {
             SpriteSelection sel(_sprite->selection().animation(), selection);
@@ -544,14 +560,7 @@ void SpriteEditor::_addDirection ()
     if (_addDirectionButton->isChecked()) {
         SpriteSelection selection = _sprite->selection();
         if (selection.isNewDirection()) {
-            SpriteAnimation animation;
-            animation= _sprite->animation(selection.animation());
-            int dir = animation.addDirection(
-                SpriteDirection(selection.newDirection())
-            );
-            _sprite->setAnimation(animation.name(), animation);
-            _sprite->setSelection(SpriteSelection(animation.name(), dir));
-            _addDirectionButton->setChecked(false);
+            _addDirection(selection.newDirection());
         } else {
             try {
                 selection = SpriteSelection(_sprite->selection().animation());
@@ -561,12 +570,6 @@ void SpriteEditor::_addDirection ()
             }
         }
     }
-    /*
-    SpriteAnimation animation = _sprite->animation(_animations->currentText());
-    int dir = animation.addDirection(SpriteDirection());
-    _sprite->setAnimation(animation.name(), animation);
-    _sprite->setSelection(SpriteSelection(animation.name(), dir));
-    */
 }
 
 void SpriteEditor::_removeDirection ()

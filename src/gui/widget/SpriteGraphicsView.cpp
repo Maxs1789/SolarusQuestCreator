@@ -21,7 +21,7 @@
 
 SpriteGraphicsView::SpriteGraphicsView ()
 {
-    setBackgroundBrush(QBrush(Qt::lightGray));
+    setBackgroundBrush(Qt::lightGray);
     setScene(new QGraphicsScene());
     _image = new QGraphicsPixmapItem;
     scene()->addItem(_image);

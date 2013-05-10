@@ -31,7 +31,7 @@ public:
     );
 
 signals:
-    void newSelection (Rect selection);
+    void newSelection (Rect);
 
 protected:
     void onSelection (const Rect &selection);

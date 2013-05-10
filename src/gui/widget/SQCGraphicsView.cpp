@@ -18,8 +18,6 @@
 #include <QWheelEvent>
 #include "gui/widget/SQCGraphicsView.h"
 
-#include <QDebug>
-
 SQCGraphicsView::SQCGraphicsView () :
     _zoom(1.0),
     _zoomMin(0.25),
@@ -30,7 +28,8 @@ SQCGraphicsView::SQCGraphicsView () :
     _keepSelection(false),
     _selection((Rect){-1, -1, -1, -1}),
     _gridW(8),
-    _gridH(8)
+    _gridH(8),
+    _selectionColor(Qt::white)
 {
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 }
@@ -38,6 +37,11 @@ SQCGraphicsView::SQCGraphicsView () :
 void SQCGraphicsView::setMakeSelection (bool canMake)
 {
     _canMakeSelection = canMake;
+}
+
+void SQCGraphicsView::setSelectionColor (QColor color)
+{
+    _selectionColor = color;
 }
 
 void SQCGraphicsView::mousePressEvent (QMouseEvent *event)
@@ -85,8 +89,21 @@ void SQCGraphicsView::paintEvent (QPaintEvent *event)
     QGraphicsView::paintEvent(event);
     QPainter painter(viewport());
     if (_selections.size()) {
+        QColor shadowColor = _selectionColor;
+        shadowColor.setAlpha(128);
+        painter.setPen(shadowColor);
         for (int i = 0; i < _selections.size(); i++) {
-            _drawComplexSelection(&painter, _selections[i]);
+            _drawComplexSelectionShadow(&painter, _selections[i]);
+        }
+        painter.setPen(_selectionColor.darker(200));
+        for (int i = 0; i < _selections.size(); i++) {
+            _drawComplexSelectionBorder(&painter, _selections[i]);
+        }
+        QPen pen(_selectionColor);
+        pen.setStyle(Qt::DashLine);
+        painter.setPen(pen);
+        for (int i = 0; i < _selections.size(); i++) {
+            _drawComplexSelectionBorder(&painter, _selections[i]);
         }
     } else if (_inSelection || _keepSelection) {
         _drawNewSelection(&painter, _selection);
@@ -169,18 +186,44 @@ void SQCGraphicsView::_snapToGrid (int &x, int &y, const bool &ceil)
 void SQCGraphicsView::_drawNewSelection (
     QPainter *painter, const Rect &selection
 ) {
-    QRect rect = mapFromScene(
+    QPolygon polygon = mapFromScene(
         selection.x, selection.y, selection.width, selection.height
-    ).boundingRect();
-    int x = rect.x(), y = rect.y(), w = rect.width(), h = rect.height();
-    painter->setPen(QColor(0, 0, 0, 128));
-    painter->drawRect(x - 1, y - 1, w + 2, h + 2);
-    painter->drawRect(x + 1, y + 1, w - 2, h - 2);
+    );
+    QPoint p = polygon.at(1);
+    p.setX(p.x() - 1);
+    polygon.setPoint(1, p);
+    p = polygon.at(2);
+    p.setX(p.x() - 1);
+    p.setY(p.y() - 1);
+    polygon.setPoint(2, p);
+    p = polygon.at(3);
+    p.setY(p.y() - 1);
+    polygon.setPoint(3, p);
+    QPolygonF shadow1, shadow2;
+    _getBorderShadows(polygon, shadow1, shadow2);
+    painter->setPen(QColor(64, 64, 64, 128));
+    painter->drawPolygon(shadow1);
+    painter->drawPolygon(shadow2);
     painter->setPen(Qt::white);
-    painter->drawRect(x, y, w, h);
+    painter->drawPolygon(polygon);
 }
 
-void SQCGraphicsView::_drawComplexSelection (
+void SQCGraphicsView::_drawComplexSelectionBorder (
+    QPainter *painter, const ComplexSelection &selection
+) {
+    QPolygonF borderPolygon = _complexSelectionBorder(selection);
+    QList<QLineF> verticalLines = _complexSelectionVerticalLines(selection);
+    QList<QLineF> horizontalLines = _complexSelectionHorizontalLines(selection);
+    painter->drawPolygon(borderPolygon);
+    for (int i = 0; i < verticalLines.size(); i++) {
+        painter->drawLine(verticalLines[i]);
+    }
+    for (int i = 0; i < horizontalLines.size(); i++) {
+        painter->drawLine(horizontalLines[i]);
+    }
+}
+
+void SQCGraphicsView::_drawComplexSelectionShadow (
     QPainter *painter, const ComplexSelection &selection
 ) {
     QPolygonF borderPolygon = _complexSelectionBorder(selection);
@@ -191,7 +234,9 @@ void SQCGraphicsView::_drawComplexSelection (
     QList<QLineF> verticalShadows = _getVerticalLinesShadows(verticalLines);
     QList<QLineF> horizontalShadows;
     horizontalShadows = _getHorizontalLinesShadows(horizontalLines);
-    painter->setPen(QColor(0, 0, 0, 128));
+    QColor shadowColor = _selectionColor.darker(400);
+    shadowColor.setAlpha(128);
+    painter->setPen(shadowColor);
     painter->drawPolygon(shadow1);
     painter->drawPolygon(shadow2);
     for (int i = 0; i < verticalShadows.size(); i++) {
@@ -199,24 +244,6 @@ void SQCGraphicsView::_drawComplexSelection (
     }
     for (int i = 0; i < horizontalShadows.size(); i++) {
         painter->drawLine(horizontalShadows[i]);
-    }
-    painter->setPen(Qt::black);
-    painter->drawPolygon(borderPolygon);
-    for (int i = 0; i < verticalLines.size(); i++) {
-        painter->drawLine(verticalLines[i]);
-    }
-    for (int i = 0; i < horizontalLines.size(); i++) {
-        painter->drawLine(horizontalLines[i]);
-    }
-    QPen pen(Qt::DashLine);
-    pen.setColor(Qt::white);
-    painter->setPen(pen);
-    painter->drawPolygon(borderPolygon);
-    for (int i = 0; i < verticalLines.size(); i++) {
-        painter->drawLine(verticalLines[i]);
-    }
-    for (int i = 0; i < horizontalLines.size(); i++) {
-        painter->drawLine(horizontalLines[i]);
     }
 }
 
@@ -226,23 +253,46 @@ QPolygonF SQCGraphicsView::_complexSelectionBorder (
     int x = selection.rect.x, y = selection.rect.y;
     int w = selection.rect.width, h = selection.rect.height;
     int l = selection.length, c = selection.cols;
-    if (l < c) {
-        return mapFromScene(QPolygon(QRect(x, y, w * l, h)));
-    }
     int r = (l / c);
-    if (l % c == 0) {
-        return mapFromScene(QPolygon(QRect(x, y, w * c, h * r)));
+    if (l < c || l % c == 0) {
+        QPolygon polygon;
+        if (l < c) {
+            polygon = mapFromScene(x, y, w * l, h);
+        } else {
+            polygon = mapFromScene(x, y, w * c, h * r);
+        }
+        QPoint p = polygon.at(1);
+        p.setX(p.x() - 1);
+        polygon.setPoint(1, p);
+        p = polygon.at(2);
+        p.setX(p.x() - 1);
+        p.setY(p.y() - 1);
+        polygon.setPoint(2, p);
+        p = polygon.at(3);
+        p.setY(p.y() - 1);
+        polygon.setPoint(3, p);
+        return polygon;
     }
     QPolygon polygon;
     int x2 = x + ((l % c) * w), x3 = x + (c * w);
     int y2 = y + (r * h), y3 = y2 + h;
-    polygon << QPoint(x, y);
-    polygon << QPoint(x3, y);
-    polygon << QPoint(x3, y2);
-    polygon << QPoint(x2, y2);
-    polygon << QPoint(x2, y3);
-    polygon << QPoint(x, y3);
-    return mapFromScene(polygon);
+    polygon << mapFromScene(x, y);
+    QPoint p = mapFromScene(x3, y);
+    p.setX(p.x() - 1);
+    polygon << p;
+    p = mapFromScene(x3, y2);
+    p.setX(p.x() - 1); p.setY(p.y() - 1);
+    polygon << p;
+    p = mapFromScene(x2, y2);
+    p.setX(p.x() - 1); p.setY(p.y() - 1);
+    polygon << p;
+    p = mapFromScene(x2, y3);
+    p.setX(p.x() - 1); p.setY(p.y() - 1);
+    polygon << p;
+    p = mapFromScene(x, y3);
+    p.setY(p.y() - 1);
+    polygon << p;
+    return polygon;
 }
 
 QList<QLineF> SQCGraphicsView::_complexSelectionVerticalLines(
@@ -263,7 +313,11 @@ QList<QLineF> SQCGraphicsView::_complexSelectionVerticalLines(
     for (int i = 1; i < c; i++) {
         int x = sx + (i * selection.rect.width);
         int h = sh - (i >= mc ? selection.rect.height : 0);
-        lines.push_back(QLineF(mapFromScene(x, sy), mapFromScene(x, sy + h)));
+        QLineF line(mapFromScene(x, sy), mapFromScene(x, sy + h));
+        QPointF p2 = line.p2(); p2.setY(p2.y() - 1);
+        line.setP2(p2);
+        line.translate(-1, 0);
+        lines.push_back(line);
     }
     return lines;
 }
@@ -281,7 +335,11 @@ QList<QLineF> SQCGraphicsView::_complexSelectionHorizontalLines(
     for (int i = c; i < l; i++) {
         int x = sx + ((i % c) * w);
         int y = sy + ((int)(i / c) * h);
-        lines.push_back(QLineF(mapFromScene(x, y), mapFromScene(x + w, y)));
+        QLineF line(mapFromScene(x, y), mapFromScene(x + w, y));
+        QPointF p = line.p2(); p.setX(p.x() - 1);
+        line.setP2(p);
+        line.translate(0, -1);
+        lines.push_back(line);
     }
     return lines;
 }

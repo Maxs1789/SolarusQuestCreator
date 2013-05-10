@@ -30,6 +30,9 @@ public:
 
     void setMakeSelection (bool canMake);
 
+public slots:
+    void setSelectionColor (QColor color);
+
 protected:
     struct ComplexSelection
     {
@@ -67,11 +70,15 @@ private:
     int _x1, _y1, _x2, _y2;
     int _gridW, _gridH;
     QList<ComplexSelection> _selections;
+    QColor _selectionColor;
 
     void _computeSelection ();
     void _snapToGrid (int &x, int &y, const bool &ceil = false);
     void _drawNewSelection (QPainter *painter, const Rect &selection);
-    void _drawComplexSelection (
+    void _drawComplexSelectionBorder (
+        QPainter *painter, const ComplexSelection &selection
+    );
+    void _drawComplexSelectionShadow (
         QPainter *painter, const ComplexSelection &selection
     );
     QPolygonF _complexSelectionBorder(const ComplexSelection &selection);
