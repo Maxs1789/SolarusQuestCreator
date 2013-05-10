@@ -29,7 +29,7 @@ SQCGraphicsView::SQCGraphicsView () :
     _selection((Rect){-1, -1, -1, -1}),
     _gridW(8),
     _gridH(8),
-    _selectionColor(Qt::white)
+    _selectionColor(Qt::blue)
 {
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 }
@@ -90,18 +90,12 @@ void SQCGraphicsView::paintEvent (QPaintEvent *event)
     QPainter painter(viewport());
     if (_selections.size()) {
         QColor shadowColor = _selectionColor;
-        shadowColor.setAlpha(128);
+        shadowColor.setAlpha(85);
         painter.setPen(shadowColor);
         for (int i = 0; i < _selections.size(); i++) {
             _drawComplexSelectionShadow(&painter, _selections[i]);
         }
-        painter.setPen(_selectionColor.darker(200));
-        for (int i = 0; i < _selections.size(); i++) {
-            _drawComplexSelectionBorder(&painter, _selections[i]);
-        }
-        QPen pen(_selectionColor);
-        pen.setStyle(Qt::DashLine);
-        painter.setPen(pen);
+        painter.setPen(_selectionColor);
         for (int i = 0; i < _selections.size(); i++) {
             _drawComplexSelectionBorder(&painter, _selections[i]);
         }
@@ -201,10 +195,14 @@ void SQCGraphicsView::_drawNewSelection (
     polygon.setPoint(3, p);
     QPolygonF shadow1, shadow2;
     _getBorderShadows(polygon, shadow1, shadow2);
-    painter->setPen(QColor(64, 64, 64, 128));
+    painter->setPen(QColor(0, 0, 0, 85));
     painter->drawPolygon(shadow1);
     painter->drawPolygon(shadow2);
-    painter->setPen(Qt::white);
+    painter->setPen(QColor(64, 64, 64));
+    painter->drawPolygon(polygon);
+    QPen pen(Qt::DashLine);
+    pen.setColor(Qt::white);
+    painter->setPen(pen);
     painter->drawPolygon(polygon);
 }
 
@@ -234,9 +232,6 @@ void SQCGraphicsView::_drawComplexSelectionShadow (
     QList<QLineF> verticalShadows = _getVerticalLinesShadows(verticalLines);
     QList<QLineF> horizontalShadows;
     horizontalShadows = _getHorizontalLinesShadows(horizontalLines);
-    QColor shadowColor = _selectionColor.darker(400);
-    shadowColor.setAlpha(128);
-    painter->setPen(shadowColor);
     painter->drawPolygon(shadow1);
     painter->drawPolygon(shadow2);
     for (int i = 0; i < verticalShadows.size(); i++) {
