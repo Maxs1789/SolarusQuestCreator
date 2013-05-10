@@ -49,8 +49,8 @@ public:
     void removeAnimation (const QString &name);
     void renameAnimation (const QString &oldName, const QString &newName);
 
-protected:
     bool isSaved () const;
+    void save (QString dataDirectory) throw(SQCException);
 
 private:
     Quest *_quest;

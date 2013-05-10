@@ -19,6 +19,7 @@
 
 #include <QMainWindow>
 #include "sol/types.h"
+#include "exception/SQCException.h"
 
 class Editor : public QMainWindow
 {
@@ -30,14 +31,15 @@ public:
     ResourceType type () const;
     QString id () const;
 
+    virtual bool isSaved () const = 0;
+    virtual void save (QString dataDirectory) throw(SQCException) = 0;
+
 signals:
-    void save (Editor *);
-    void close (Editor *);
+    void onSave (Editor *);
+    void onClose (Editor *);
 
 protected:
     void closeEvent (QCloseEvent *event);
-
-    virtual bool isSaved () const = 0;
 
 private:
     QString _questDir;

@@ -48,11 +48,11 @@ void Editor::closeEvent (QCloseEvent *event)
             QMessageBox::Cancel | QMessageBox::Save | QMessageBox::Discard
         );
         if (r == QMessageBox::Save) {
-            emit save(this);
+            emit onSave(this);
         } else if (r == QMessageBox::Cancel) {
             event->ignore();
             return;
         }
     }
-    emit close(this);
+    emit onClose(this);
 }

@@ -162,11 +162,11 @@ void MainWindow::_openEditor (Quest *quest, ResourceType type, QString id)
             _editors[SPRITE][dir][id] = editor;
             _mdiArea->addSubWindow(editor);
             connect(
-                editor, SIGNAL(close(Editor*)),
+                editor, SIGNAL(onClose(Editor*)),
                 this, SLOT(_closeEditor(Editor*))
             );
             connect(
-                editor, SIGNAL(save(Editor*)),
+                editor, SIGNAL(onSave(Editor*)),
                 this, SLOT(_saveResource(Editor*))
             );
         }
@@ -260,18 +260,19 @@ void MainWindow::_openNewResourceDialog (ResourceType type)
 
 void MainWindow::_saveResource (Editor *editor)
 {
-    QString dir = editor->questDir();
-    ResourceType type = editor->type();
-    QString id = editor->id();
-    Quest *quest = _quests[dir];
-    if (type == SPRITE) {
-        Sprite *sprite = ((SpriteEditor *)editor)->sprite();
+    if (!editor->isSaved()) {
         try {
-            if (!sprite->isSaved()) {
-                sprite->save(quest->dataDirectory());
-                quest->setSprite(sprite->id(), sprite->copy());
-                quest->save();
+            QString dir = editor->questDir();
+            Quest *quest = _quests[dir];
+            editor->save(quest->dataDirectory());
+            ResourceType type = editor->type();
+            QString id = editor->id();
+            switch (type) {
+            case SPRITE: quest->setSprite(
+                id, ((SpriteEditor *)editor)->sprite()->copy()
+            ); break;
             }
+            quest->save();
         } catch (const SQCException &ex) {
             QMessageBox::warning(this, "warn", ex.message());
         }

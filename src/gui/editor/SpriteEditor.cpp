@@ -167,7 +167,12 @@ void SpriteEditor::renameAnimation (
 
 bool SpriteEditor::isSaved () const
 {
-    return !_sprite->canUndo();
+    return _sprite->isSaved();
+}
+
+void SpriteEditor::save (QString dataDirectory) throw(SQCException)
+{
+    _sprite->save(dataDirectory);
 }
 
 void SpriteEditor::_initWidgets ()
@@ -623,7 +628,7 @@ void SpriteEditor::_downDirection ()
 
 void SpriteEditor::_save ()
 {
-    emit save(this);
+    emit onSave(this);
     _refreshTitle();
 }
 
