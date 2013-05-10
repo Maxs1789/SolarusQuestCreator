@@ -34,6 +34,7 @@ public:
 
 signals:
     void directionChange (SpriteDirection direction);
+    void directDirectionChange (SpriteDirection direction);
 
 private:
     SpriteDirection _direction;
@@ -59,6 +60,15 @@ private slots:
     void _originYChange ();
     void _nbFramesChange ();
     void _nbColumnsChange ();
+
+    void _directXChange ();
+    void _directYChange ();
+    void _directWidthChange ();
+    void _directHeightChange ();
+    void _directOriginXChange ();
+    void _directOriginYChange ();
+    void _directNbFramesChange ();
+    void _directNbColumnsChange ();
 };
 
 #endif

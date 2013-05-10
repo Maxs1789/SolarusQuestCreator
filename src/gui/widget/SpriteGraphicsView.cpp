@@ -47,6 +47,7 @@ void SpriteGraphicsView::setSelection (
         setNewSelection(selection.newDirection());
         keepSelection();
     }
+    viewport()->update();
 }
 
 void SpriteGraphicsView::onSelection (const Rect &selection)

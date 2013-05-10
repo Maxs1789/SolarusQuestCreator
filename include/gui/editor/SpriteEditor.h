@@ -106,6 +106,9 @@ private slots:
     void _directionSelectionChange ();
     void _directionNewSelection (Rect selection);
     void _directionChange (SpriteDirection direction);
+    void _directAnimationChange (SpriteAnimation animation);
+    void _directDirectionChange (SpriteDirection direction);
+
     void _addDirection ();
     void _removeDirection ();
     void _upDirection ();
