@@ -19,12 +19,16 @@
 
 SpriteAnimation::SpriteAnimation (
     QString name, QString image, int frameDelay, int frameOnLoop
-) :
+) throw(SQCException) :
     _name(name),
     _image(image),
     _frameDelay(frameDelay),
     _frameOnLoop(frameOnLoop)
-{}
+{
+    _checkName(name);
+    _checkFrameDelay(frameDelay);
+    _checkFrameOnLoop(frameOnLoop);
+}
 
 SpriteAnimation::SpriteAnimation (const SpriteAnimation &other, QString name) :
     _name(name),
@@ -153,6 +157,13 @@ QString SpriteAnimation::toData () const
         data += QString::number(_directions[i].nbColumns());
     }
     return data;
+}
+
+void SpriteAnimation::_checkName (QString name) const throw(SQCException)
+{
+    if (name == "") {
+        throw SQCException(QObject::tr("animation name cannot be empty"));
+    }
 }
 
 void SpriteAnimation::_checkDirectionExists (int n) const

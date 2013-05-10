@@ -36,9 +36,9 @@ public:
      * @param frameOnLoop Le numéro de frame de boucle
      */
     SpriteAnimation (
-        QString name = "", QString image = "",
+        QString name = "anim_0", QString image = "",
         int frameDelay = 0, int frameOnLoop = -1
-    );
+    ) throw(SQCException);
     /**
      * @brief Constructeur par copie d'une animation de Sprite.
      *
@@ -169,6 +169,7 @@ private:
     int _frameOnLoop;
     QList<SpriteDirection> _directions;
 
+    void _checkName (QString name) const throw(SQCException);
     void _checkDirectionExists (int n) const throw(SQCException);
     void _checkFrameDelay (int frameDelay) const throw(SQCException);
     void _checkFrameOnLoop (int frameOnLoop) const throw(SQCException);

@@ -212,6 +212,9 @@ void Sprite::setAnimation (QString name, const SpriteAnimation &animation)
 
 void Sprite::renameAnimation (QString name, QString newName) throw(SQCException)
 {
+    if (newName == "") {
+        throw SQCException(QObject::tr("animation name cannot be empty"));
+    }
     if (name != newName) {
         _checkAnimationExists(name);
         _checkAnimationNExists(newName);
