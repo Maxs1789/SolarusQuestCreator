@@ -46,6 +46,8 @@ signals:
     void animationChange (SpriteAnimation animation);
     void tilesetChange ();
 
+    void directAnimationChange (SpriteAnimation animation);
+
 private:
     Quest *_quest;
     QString _directory;
@@ -68,6 +70,9 @@ private slots:
     void _frameOnLoopChange ();
     void _findImage ();
     void _tilesetChange ();
+
+    void _directFrameDelayChange ();
+    void _directFrameOnLoopChange ();
 };
 
 #endif

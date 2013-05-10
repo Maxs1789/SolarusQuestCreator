@@ -38,6 +38,28 @@ SpriteDirectionEditor::SpriteDirectionEditor ()
     connect(
         _nbColumns, SIGNAL(editingFinished()), this, SLOT(_nbColumnsChange())
     );
+    connect(_x, SIGNAL(valueChanged(int)), this, SLOT(_directXChange()));
+    connect(_y, SIGNAL(valueChanged(int)), this, SLOT(_directYChange()));
+    connect(
+        _width, SIGNAL(valueChanged(int)), this, SLOT(_directWidthChange())
+    );
+    connect(
+        _height, SIGNAL(valueChanged(int)), this, SLOT(_directHeightChange())
+    );
+    connect(
+        _originX, SIGNAL(valueChanged(int)), this, SLOT(_directOriginXChange())
+    );
+    connect(
+        _originY, SIGNAL(valueChanged(int)), this, SLOT(_directOriginYChange())
+    );
+    connect(
+        _nbFrames, SIGNAL(valueChanged(int)),
+        this, SLOT(_directNbFramesChange())
+    );
+    connect(
+        _nbColumns, SIGNAL(valueChanged(int)),
+        this, SLOT(_directNbColumnsChange())
+    );
 }
 
 SpriteDirection SpriteDirectionEditor::direction () const
@@ -201,4 +223,60 @@ void SpriteDirectionEditor::_nbColumnsChange ()
         _direction.setNbColumns(_nbColumns->value());
         emit directionChange(_direction);
     }
+}
+
+void SpriteDirectionEditor::_directXChange ()
+{
+    SpriteDirection direction = _direction;
+    direction.setX(_x->value());
+    emit directDirectionChange(direction);
+}
+
+void SpriteDirectionEditor::_directYChange ()
+{
+    SpriteDirection direction = _direction;
+    direction.setY(_y->value());
+    emit directDirectionChange(direction);
+}
+
+void SpriteDirectionEditor::_directWidthChange ()
+{
+    SpriteDirection direction = _direction;
+    direction.setWidth(_width->value());
+    emit directDirectionChange(direction);
+}
+
+void SpriteDirectionEditor::_directHeightChange ()
+{
+    SpriteDirection direction = _direction;
+    direction.setHeight(_height->value());
+    emit directDirectionChange(direction);
+}
+
+void SpriteDirectionEditor::_directOriginXChange ()
+{
+    SpriteDirection direction = _direction;
+    direction.setOriginX(_originX->value());
+    emit directDirectionChange(direction);
+}
+
+void SpriteDirectionEditor::_directOriginYChange ()
+{
+    SpriteDirection direction = _direction;
+    direction.setOriginY(_originY->value());
+    emit directDirectionChange(direction);
+}
+
+void SpriteDirectionEditor::_directNbFramesChange ()
+{
+    SpriteDirection direction = _direction;
+    direction.setNbFrames(_nbFrames->value());
+    emit directDirectionChange(direction);
+}
+
+void SpriteDirectionEditor::_directNbColumnsChange ()
+{
+    SpriteDirection direction = _direction;
+    direction.setNbColumns(_nbColumns->value());
+    emit directDirectionChange(direction);
 }

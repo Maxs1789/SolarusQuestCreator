@@ -48,6 +48,14 @@ SpriteAnimationEditor::SpriteAnimationEditor (Quest *quest) :
         _tilesetComboBox, SIGNAL(currentIndexChanged(int)),
         this, SLOT(_tilesetChange())
     );
+    connect(
+        _frameDelay, SIGNAL(valueChanged(int)),
+        this, SLOT(_directFrameDelayChange())
+    );
+    connect(
+        _frameOnLoop, SIGNAL(valueChanged(int)),
+        this, SLOT(_directFrameOnLoopChange())
+    );
 }
 
 SpriteAnimation SpriteAnimationEditor::animation () const
@@ -160,4 +168,18 @@ void SpriteAnimationEditor::_findImage ()
 void SpriteAnimationEditor::_tilesetChange ()
 {
     emit tilesetChange();
+}
+
+void SpriteAnimationEditor::_directFrameDelayChange ()
+{
+    SpriteAnimation animation = _animation;
+    animation.setFrameDelay(_frameDelay->value());
+    emit directAnimationChange(animation);
+}
+
+void SpriteAnimationEditor::_directFrameOnLoopChange ()
+{
+    SpriteAnimation animation = _animation;
+    animation.setFrameOnLoop(_frameOnLoop->value());
+    emit directAnimationChange(animation);
 }

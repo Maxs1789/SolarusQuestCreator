@@ -301,6 +301,14 @@ void SpriteEditor::_connects ()
         this, SLOT(_directionChange(SpriteDirection))
     );
     connect(
+        _animationEditor, SIGNAL(directAnimationChange(SpriteAnimation)),
+        this, SLOT(_directAnimationChange(SpriteAnimation))
+    );
+    connect(
+        _directionEditor, SIGNAL(directDirectionChange(SpriteDirection)),
+        this, SLOT(_directDirectionChange(SpriteDirection))
+    );
+    connect(
         _addDirectionButton, SIGNAL(clicked()), this, SLOT(_addDirection())
     );
     connect(
@@ -553,6 +561,23 @@ void SpriteEditor::_directionChange (SpriteDirection direction)
         animation.setDirection(n, direction);
         _sprite->setAnimation(animation.name(), animation);
     }
+}
+
+void SpriteEditor::_directAnimationChange (SpriteAnimation animation)
+{
+    int n = _directions->currentItem()->data(QListWidgetItem::UserType).toInt();
+    SpriteDirection direction = animation.direction(n);
+    _refreshDirectionPreview(animation, direction);
+}
+
+void SpriteEditor::_directDirectionChange (SpriteDirection direction)
+{
+    int n = _directions->currentItem()->data(QListWidgetItem::UserType).toInt();
+    SpriteSelection selection(_sprite->selection().animation(), n);
+    SpriteAnimation animation = _sprite->animation(selection.animation());
+    animation.setDirection(selection.direction(), direction);
+    _refreshDirectionPreview(animation, direction);
+    _graphicsView->setSelection(animation, selection);
 }
 
 void SpriteEditor::_addDirection ()
