@@ -267,10 +267,11 @@ void MainWindow::_saveResource (Editor *editor)
     if (type == SPRITE) {
         Sprite *sprite = ((SpriteEditor *)editor)->sprite();
         try {
-            sprite->save(quest->dataDirectory());
-            quest->setSprite(sprite->id(), sprite->copy());
-            quest->save();
-            sprite->clearActions();
+            if (!sprite->isSaved()) {
+                sprite->save(quest->dataDirectory());
+                quest->setSprite(sprite->id(), sprite->copy());
+                quest->save();
+            }
         } catch (const SQCException &ex) {
             QMessageBox::warning(this, "warn", ex.message());
         }

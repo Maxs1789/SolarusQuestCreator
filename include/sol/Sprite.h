@@ -56,6 +56,12 @@ public:
      */
     Sprite (QString id, QString name = "new sprite");
     /**
+     * @brief Vérifie que le Sprite est à l'état de sauvegarde.
+     *
+     * @return `true` si le Sprite est à l'état de sauvegarde, `false` sinon.
+     */
+    bool isSaved () const;
+    /**
      * @brief Sauvegarde un Sprite dans un dossier de quete (Quest)
      *
      * @param dataDirectory Le dossier de travail de la quete.

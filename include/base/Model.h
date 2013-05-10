@@ -124,7 +124,8 @@ protected:
     /**
      * @brief Constructeur de modèle.
      */
-    Model ()
+    Model () :
+        _saveReference(0)
     {
         _currentAction = _actions.end();
     }
@@ -191,11 +192,31 @@ protected:
      * @param view     La vue à notifier.
      */
     virtual void onUserNotify (int userType, type_View *view) = 0;
+    /**
+     * @brief Vérifie la référence de sauvegarde du modèle.
+     *
+     * @return `true` si le modèle est à l'état de sauvegarde, `false` sinon.
+     */
+    bool checkSaveReference () const
+    {
+        if (_saveReference == 0) {
+            return !canUndo();
+        }
+        return _saveReference == *(_currentAction - 1);
+    }
+    /**
+     * @brief Fait pointer la référence de sauvegarde sur l'état courant.
+     */
+    void resetSaveReference ()
+    {
+        _saveReference = *(_currentAction - 1);
+    }
 
 private:
     QList<type_View *> _views;
     QList<Action *> _actions;
     QList<Action *>::iterator _currentAction;
+    Action *_saveReference;
 
     void _notifyAction (Action *action)
     {

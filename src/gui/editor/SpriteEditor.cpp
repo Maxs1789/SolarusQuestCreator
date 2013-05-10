@@ -338,11 +338,11 @@ void SpriteEditor::_firstRefresh ()
 void SpriteEditor::_refreshTitle ()
 {
     QString title = _quest->writeDir() + " - sprite: " + _sprite->name();
-    if (_sprite->canUndo()) {
+    if (!_sprite->isSaved()) {
         title += "*";
     }
     setWindowTitle(title);
-    _actionSave->setEnabled(_sprite->canUndo());
+    _actionSave->setEnabled(!_sprite->isSaved());
     _actionUndo->setEnabled(_sprite->canUndo());
     _actionRedo->setEnabled(_sprite->canRedo());
 }

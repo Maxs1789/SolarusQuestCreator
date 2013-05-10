@@ -96,8 +96,16 @@ Sprite *Sprite::load (QString dataDirectory, QString id, QString name)
     return sprite;
 }
 
+bool Sprite::isSaved () const
+{
+    return checkSaveReference();
+}
+
 void Sprite::save (QString dataDirectory) throw(SQCException)
 {
+    if (checkSaveReference()) {
+        return;
+    }
     QString filename = dataDirectory + "sprites/" + id() + ".dat";
     QFileInfo info(filename);
     QString dir = info.absoluteDir().absolutePath();
@@ -115,6 +123,7 @@ void Sprite::save (QString dataDirectory) throw(SQCException)
         file.write("\n\n");
     }
     file.close();
+    resetSaveReference();
 }
 
 bool Sprite::animationExists (QString name) const
