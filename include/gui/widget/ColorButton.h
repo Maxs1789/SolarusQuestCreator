@@ -19,7 +19,6 @@
 
 #include <QPushButton>
 #include <QColorDialog>
-#include <QStyle>
 
 class ColorButton : public QPushButton
 {
@@ -49,16 +48,16 @@ private:
 
     void _refresh ()
     {
-        QString style = "border:1px solid black;";
-        style += "background-color:" + _color.name();
-        setStyleSheet(style);
+        QString style = "border:1px solid gray;border-radius:3px;";
+        style += "margin:5px;max-width:24px;max-height:16px;";
+        setStyleSheet(style + "background-color:" + _color.name());
     }
 
 private slots:
     void _onClick ()
     {
         QColor color = QColorDialog::getColor(_color, (QWidget*)parent());
-        if (color != _color) {
+        if (color.isValid() && color != _color) {
             _color = color;
             _refresh();
             emit colorChange(color);

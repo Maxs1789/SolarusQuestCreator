@@ -29,7 +29,9 @@ SQCGraphicsView::SQCGraphicsView () :
     _selection((Rect){-1, -1, -1, -1}),
     _gridW(8),
     _gridH(8),
-    _selectionColor(Qt::blue)
+    _selectionColor(Qt::blue),
+    _showSceneBorder(false),
+    _snap(true)
 {
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 }
@@ -39,9 +41,40 @@ void SQCGraphicsView::setMakeSelection (bool canMake)
     _canMakeSelection = canMake;
 }
 
+void SQCGraphicsView::setZoom (float zoom)
+{
+    if (zoom != _zoom && zoom >= _zoomMin && zoom <= _zoomMax) {
+        _zoom = zoom;
+        QTransform tran;
+        tran.scale(_zoom, _zoom);
+        setTransform(tran);
+        emit zoomChange(zoom);
+    }
+}
+
 void SQCGraphicsView::setSelectionColor (QColor color)
 {
     _selectionColor = color;
+}
+
+void SQCGraphicsView::setShowSceneBorder (bool show)
+{
+    _showSceneBorder = show;
+}
+
+void SQCGraphicsView::setSnap (bool snap)
+{
+    _snap = snap;
+}
+
+void SQCGraphicsView::setGridWidth (int width)
+{
+    _gridW = width < 1 ? 1 : width;
+}
+
+void SQCGraphicsView::setGridHeight (int height)
+{
+    _gridH = height < 1 ? 1 : height;
 }
 
 void SQCGraphicsView::mousePressEvent (QMouseEvent *event)
@@ -50,8 +83,10 @@ void SQCGraphicsView::mousePressEvent (QMouseEvent *event)
     if (!clickOnItems(items(event->pos())) && _canMakeSelection) {
         QPointF pos = mapToScene(event->pos());
         _x1 = _x2 = pos.x(); _y1 = _y2 = pos.y();
-        _snapToGrid(_x1, _y1);
-        _snapToGrid(_x2, _y2, true);
+        if (_snap) {
+            _snapToGrid(_x1, _y1);
+            _snapToGrid(_x2, _y2, true);
+        }
         _computeSelection();
         _inSelection = true;
         viewport()->repaint();
@@ -63,12 +98,14 @@ void SQCGraphicsView::mouseMoveEvent (QMouseEvent *event)
     if (_inSelection) {
         QPointF pos = mapToScene(event->pos());
         _x2 = pos.x(); _y2 = pos.y();
-        _snapToGrid(_x2, _y2);
-        if (_x2 >= _x1) {
-            _x2 += _gridW;
-        }
-        if (_y2 >= _y1) {
-            _y2 += _gridH;
+        if (_snap) {
+            _snapToGrid(_x2, _y2);
+            if (_x2 >= _x1) {
+                _x2 += _gridW;
+            }
+            if (_y2 >= _y1) {
+                _y2 += _gridH;
+            }
         }
         _computeSelection();
         viewport()->repaint();
@@ -88,6 +125,10 @@ void SQCGraphicsView::paintEvent (QPaintEvent *event)
 {
     QGraphicsView::paintEvent(event);
     QPainter painter(viewport());
+    if (_showSceneBorder) {
+        QPolygonF polygon = mapFromScene(sceneRect());
+        painter.drawRect(polygon.boundingRect().adjusted(-1, -1, 0, 0));
+    }
     if (_selections.size()) {
         QColor shadowColor = _selectionColor;
         shadowColor.setAlpha(85);
@@ -122,6 +163,7 @@ void SQCGraphicsView::wheelEvent (QWheelEvent *event)
         QTransform tran;
         tran.scale(_zoom, _zoom);
         setTransform(tran);
+        emit zoomChange(_zoom);
     } else {
         QGraphicsView::wheelEvent(event);
     }
@@ -230,16 +272,7 @@ QPolygonF SQCGraphicsView::_complexSelectionBorder (
         } else {
             polygon = mapFromScene(x, y, w * c, h * r);
         }
-        QPoint p = polygon.at(1);
-        p.setX(p.x() - 1);
-        polygon.setPoint(1, p);
-        p = polygon.at(2);
-        p.setX(p.x() - 1);
-        p.setY(p.y() - 1);
-        polygon.setPoint(2, p);
-        p = polygon.at(3);
-        p.setY(p.y() - 1);
-        polygon.setPoint(3, p);
+        polygon = polygon.boundingRect().adjusted(0, 0, -2, -2);
         return polygon;
     }
     QPolygon polygon;
@@ -303,22 +336,18 @@ QList<QLineF> SQCGraphicsView::_complexSelectionInnerLines (
 QPolygonF SQCGraphicsView::_getBorderShadow (const QPolygonF &polygon)
 {
     QPolygonF shadow;
-    QPointF p = polygon.at(0);
-    shadow << QPointF(p.x() - 1, p.y() - 1);
-    p = polygon.at(1);
-    shadow << QPointF(p.x() + 1, p.y() - 1);
-    p = polygon.at(2);
-    shadow << QPointF(p.x() + 1, p.y() + 1);
     if (polygon.size() == 4) {
-        p = polygon.at(3);
-        shadow << QPointF(p.x() - 1, p.y() + 1);
+        shadow = polygon.boundingRect().adjusted(-1, -1, 1, 1);
     } else {
-        p = polygon.at(3);
-        shadow << QPointF(p.x() + 1, p.y() + 1);
-        p = polygon.at(4);
-        shadow << QPointF(p.x() + 1, p.y() + 1);
-        p = polygon.at(5);
-        shadow << QPointF(p.x() - 1, p.y() + 1);
+        QPointF p1 = polygon.at(0), p2 = polygon.at(2), p3 = polygon.at(4);
+        int x1 = p1.x() - 1, x2 = p3.x() + 1, x3 = p2.x() + 1;
+        int y1 = p1.y() - 1, y2 = p2.y() + 1, y3 = p3.y() + 1;
+        shadow << QPointF(x1, y1);
+        shadow << QPointF(x3, y1);
+        shadow << QPointF(x3, y2);
+        shadow << QPointF(x2, y2);
+        shadow << QPointF(x2, y3);
+        shadow << QPointF(x1, y3);
     }
     return shadow;
 }

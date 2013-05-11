@@ -22,6 +22,7 @@
 SpriteGraphicsView::SpriteGraphicsView ()
 {
     setBackgroundBrush(Qt::lightGray);
+    setShowSceneBorder(true);
     setScene(new QGraphicsScene());
     _image = new QGraphicsPixmapItem;
     scene()->addItem(_image);
@@ -52,5 +53,11 @@ void SpriteGraphicsView::setSelection (
 
 void SpriteGraphicsView::onSelection (const Rect &selection)
 {
+    if (
+        selection.x + selection.width > _image->pixmap().width() ||
+        selection.y + selection.height > _image->pixmap().height()
+    ) {
+        emit newSelection((Rect){-1, -1, -1, -1});
+    }
     emit newSelection(selection);
 }

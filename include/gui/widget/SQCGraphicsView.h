@@ -31,7 +31,15 @@ public:
     void setMakeSelection (bool canMake);
 
 public slots:
+    void setZoom (float zoom);
     void setSelectionColor (QColor color);
+    void setShowSceneBorder (bool show);
+    void setSnap (bool snap);
+    void setGridWidth (int width);
+    void setGridHeight (int height);
+
+signals:
+    void zoomChange (float);
 
 protected:
     struct ComplexSelection
@@ -71,6 +79,8 @@ private:
     int _gridW, _gridH;
     QList<ComplexSelection> _selections;
     QColor _selectionColor;
+    bool _showSceneBorder;
+    bool _snap;
 
     void _computeSelection ();
     void _snapToGrid (int &x, int &y, const bool &ceil = false);

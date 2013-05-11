@@ -77,8 +77,10 @@ private:
     int _animCount;
     QPixmap _currentImage;
     ColorButton *_colorButton;
+    QComboBox *_graphicsViewZoom;
 
     void _initWidgets ();
+    void _initToolBar ();
     void _connects ();
     void _firstRefresh ();
 
@@ -118,6 +120,9 @@ private slots:
 
     void _undo ();
     void _redo ();
+
+    void _graphicsViewSetZoom (float zoom);
+    void _graphicsViewZoomChange ();
 };
 
 #endif

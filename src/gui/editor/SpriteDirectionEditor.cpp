@@ -103,27 +103,28 @@ void SpriteDirectionEditor::_initWidgets ()
     _originY->setSingleStep(4);
 
     QGridLayout *layout = new QGridLayout;
-    layout->addWidget(new QLabel(tr("X:")), 0, 0, 1, 1, Qt::AlignRight);
+    layout->addWidget(new QLabel(tr("Position:")), 0, 0, 1, 1, Qt::AlignRight);
     layout->addWidget(_x, 0, 1);
-    layout->addWidget(new QLabel(tr("Y:")), 1, 0, 1, 1, Qt::AlignRight);
-    layout->addWidget(_y, 1, 1);
-    layout->addWidget(new QLabel(tr("Width:")), 2, 0, 1, 1, Qt::AlignRight);
-    layout->addWidget(_width, 2, 1);
-    layout->addWidget(new QLabel(tr("Height:")), 3, 0, 1, 1, Qt::AlignRight);
-    layout->addWidget(_height, 3, 1);
-    layout->addWidget(new QLabel(tr("Origin x:")), 0, 2, 1, 1, Qt::AlignRight);
-    layout->addWidget(_originX, 0, 3);
-    layout->addWidget(new QLabel(tr("Origin y:")), 1, 2, 1, 1, Qt::AlignRight);
-    layout->addWidget(_originY, 1, 3);
+    layout->addWidget(new QLabel(";"), 0, 2, 1, 1, Qt::AlignRight);
+    layout->addWidget(_y, 0, 3);
+    layout->addWidget(new QLabel(tr("Size:")), 1, 0, 1, 1, Qt::AlignRight);
+    layout->addWidget(_width, 1, 1);
+    layout->addWidget(new QLabel("x"), 1, 2, 1, 1, Qt::AlignRight);
+    layout->addWidget(_height, 1, 3);
+    layout->addWidget(new QLabel(tr("Origin:")), 2, 0, 1, 1, Qt::AlignRight);
+    layout->addWidget(_originX, 2, 1);
+    layout->addWidget(new QLabel(";"), 2, 2, 1, 1, Qt::AlignRight);
+    layout->addWidget(_originY, 2, 3);
 
     layout->addWidget(
-        new QLabel(tr("Number of frames:")), 2, 2, 1, 1, Qt::AlignRight
+        new QLabel(tr("Number of frames:")), 3, 0, 1, 3, Qt::AlignRight
     );
-    layout->addWidget(_nbFrames, 2, 3);
+    layout->addWidget(_nbFrames, 3, 3);
     layout->addWidget(
-        new QLabel(tr("Number of columns:")), 3, 2, 1, 1, Qt::AlignRight
+        new QLabel(tr("Number of columns:")), 4, 0, 1, 3, Qt::AlignRight
     );
-    layout->addWidget(_nbColumns, 3, 3);
+
+    layout->addWidget(_nbColumns, 4, 3);
     setLayout(layout);
 }
 

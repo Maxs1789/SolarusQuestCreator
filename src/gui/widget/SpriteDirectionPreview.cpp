@@ -80,8 +80,8 @@ void SpriteDirectionPreview::_initWidgets ()
     _frame->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     _frame->setLineWidth(1);
     _frame->setAlignment(Qt::AlignCenter);
+    _frame->setMargin(3);
     _graphicsView->setScene(new QGraphicsScene());
-    _graphicsView->setMaximumSize(128, 128);
     _graphicsView->setBackgroundBrush(QBrush(Qt::lightGray));
     _play->setMaximumSize(24, 24);
     _next->setMaximumSize(24, 24);
@@ -90,19 +90,19 @@ void SpriteDirectionPreview::_initWidgets ()
     _first->setMaximumSize(24, 24);
     _last->setMaximumSize(24, 24);
 
-    QGridLayout *buttonLayout = new QGridLayout;
-    buttonLayout->addWidget(_prev, 0, 0);
-    buttonLayout->addWidget(_frame, 0, 1, 1, 2);
-    buttonLayout->addWidget(_next, 0, 3);
-    buttonLayout->addWidget(_first, 1, 0);
-    buttonLayout->addWidget(_play, 1, 1);
-    buttonLayout->addWidget(_stop, 1, 2);
-    buttonLayout->addWidget(_last, 1, 3);
-    buttonLayout->setSizeConstraint(QLayout::SetMaximumSize);
+    QHBoxLayout *buttonLayout = new QHBoxLayout;
+    buttonLayout->addWidget(_play);
+    buttonLayout->addWidget(_first);
+    buttonLayout->addWidget(_prev);
+    buttonLayout->addWidget(_frame);
+    buttonLayout->addWidget(_next);
+    buttonLayout->addWidget(_last);
+    buttonLayout->addWidget(_stop);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(_graphicsView);
     layout->addLayout(buttonLayout);
+    layout->setAlignment(buttonLayout, Qt::AlignCenter);
     setLayout(layout);
 }
 

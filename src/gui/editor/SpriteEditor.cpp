@@ -24,10 +24,10 @@
 #include <QListWidget>
 #include <QGroupBox>
 #include <QPushButton>
-#include <QStatusBar>
 #include <QToolBar>
 #include <QAction>
 #include <QMessageBox>
+#include <QSplitter>
 #include "gui/widget/SpriteGraphicsView.h"
 #include "gui/editor/SpriteEditor.h"
 #include "gui/editor/SpriteAnimationEditor.h"
@@ -47,6 +47,7 @@ SpriteEditor::SpriteEditor (Quest *quest, const Sprite &sprite) :
     *_sprite = sprite;
     _sprite->attach(this);
     _initWidgets();
+    _initToolBar();
     _firstRefresh();
     try {
         _sprite->setSelection(_animations->currentText());
@@ -237,30 +238,62 @@ void SpriteEditor::_initWidgets ()
     directionsLayout->setColumnStretch(0, 1);
     _directionGroup->setLayout(directionsLayout);
 
+    QWidget *directionWidget = new QWidget;
+    QHBoxLayout *directionLayout = new QHBoxLayout;
+    directionLayout->addWidget(_directionEditor);
+    directionLayout->addWidget(_directionPreview);
+    directionWidget->setLayout(directionLayout);
+
+    QSplitter *splitter = new QSplitter(Qt::Vertical);
+    splitter->addWidget(_graphicsView);
+    splitter->addWidget(directionWidget);
+
     QGridLayout *layout = new QGridLayout;
     layout->addLayout(propertiesLayout, 0, 0, 1, 1, Qt::AlignCenter);
     layout->addWidget(_animationGroup, 1, 0);
-    layout->addWidget(_graphicsView, 0, 1, 3, 5);
-    layout->addWidget(_directionGroup, 2, 0, 2, 1);
-    layout->addWidget(_directionEditor, 3, 2);
-    layout->addWidget(_directionPreview, 3, 4);
+    layout->addWidget(_directionGroup, 2, 0);
+    layout->addWidget(splitter, 0, 1, 3, 1);
 
     layout->setColumnStretch(1, 1);
-    layout->setColumnStretch(3, 1);
-    layout->setColumnStretch(5, 1);
     layout->setRowStretch(2, 1);
 
     setCentralWidget(new QWidget());
     centralWidget()->setLayout(layout);
+}
 
-    setStatusBar(new QStatusBar());
-    QToolBar *t = addToolBar("");
-    _actionSave = t->addAction(QIcon(":fugue/save"), "");
-    _actionUndo = t->addAction(QIcon(":fugue/undo"), "");
-    _actionRedo = t->addAction(QIcon(":fugue/redo"), "");
-    _colorButton = new ColorButton(Qt::white);
-    t->addWidget(_colorButton);
-    t->setMovable(false);
+void SpriteEditor::_initToolBar ()
+{
+    QWidget *spacer1 = new QWidget, *spacer2 = new QWidget;
+    spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    spacer2->setMinimumWidth(10);
+
+    QToolBar *toolBar = addToolBar("");
+    _actionSave = toolBar->addAction(QIcon(":fugue/save"), "");
+    toolBar->addSeparator();
+    _actionUndo = toolBar->addAction(QIcon(":fugue/undo"), "");
+    _actionRedo = toolBar->addAction(QIcon(":fugue/redo"), "");
+
+    toolBar->addSeparator();
+    toolBar->addWidget(spacer1);
+    toolBar->addSeparator();
+
+    _colorButton = new ColorButton(Qt::blue);
+    _graphicsViewZoom = new QComboBox;
+
+    _graphicsViewZoom->addItem("800%", 8.0);
+    _graphicsViewZoom->addItem("400%", 4.0);
+    _graphicsViewZoom->addItem("200%", 2.0);
+    _graphicsViewZoom->addItem("100%", 1.0);
+    _graphicsViewZoom->addItem("50%", 0.5);
+    _graphicsViewZoom->addItem("25%", 0.25);
+    _graphicsViewZoom->setCurrentIndex(3);
+
+    toolBar->addWidget(_colorButton);
+    toolBar->addSeparator();
+    toolBar->addWidget(_graphicsViewZoom);
+
+    toolBar->addWidget(spacer2);
+    toolBar->setMovable(false);
 
     _actionSave->setEnabled(false);
     _actionUndo->setEnabled(false);
@@ -332,6 +365,14 @@ void SpriteEditor::_connects ()
     connect(
         _colorButton, SIGNAL(colorChange(QColor)),
         _graphicsView, SLOT(setSelectionColor(QColor))
+    );
+    connect(
+        _graphicsView, SIGNAL(zoomChange(float)),
+        this, SLOT(_graphicsViewSetZoom(float))
+    );
+    connect(
+        _graphicsViewZoom, SIGNAL(currentIndexChanged(int)),
+        this, SLOT(_graphicsViewZoomChange())
     );
 }
 
@@ -448,9 +489,7 @@ void SpriteEditor::_swapDirection (const int &n1, const int &n2)
         animation.swapDirection(n1, n2);
         _sprite->setAnimation(animation.name(), animation);
         _sprite->setSelection(SpriteSelection(animation.name(), n2));
-    } catch (const SQCException &ex) {
-        statusBar()->showMessage(ex.message(), 5000);
-    }
+    } catch (const SQCException &ex) {}
 }
 
 void SpriteEditor::_addDirection (Rect selection)
@@ -462,9 +501,7 @@ void SpriteEditor::_addDirection (Rect selection)
         _sprite->setAnimation(animation.name(), animation);
         _sprite->setSelection(SpriteSelection(animation.name(), dir));
         _addDirectionButton->setChecked(false);
-    } catch (const SQCException &ex) {
-        statusBar()->showMessage(ex.message(), 5000);
-    }
+    } catch (const SQCException &ex) {}
 }
 
 void SpriteEditor::_nameChange ()
@@ -479,9 +516,7 @@ void SpriteEditor::_animationSelectionChange ()
         _sprite->setSelection(SpriteSelection(
             _animations->itemData(n).toString()
         ));
-    } catch (const SQCException &ex) {
-        statusBar()->showMessage(ex.message(), 5000);
-    }
+    } catch (const SQCException &ex) {}
 }
 
 void SpriteEditor::_animationRename ()
@@ -493,7 +528,6 @@ void SpriteEditor::_animationRename ()
         _sprite->renameAnimation(oldName, newName);
     } catch (const SQCException &ex) {
         _animations->setCurrentIndex(n);
-        statusBar()->showMessage(ex.message(), 5000);
     }
 }
 
@@ -527,9 +561,7 @@ void SpriteEditor::_removeAnimation ()
 {
     try {
         _sprite->removeAnimation(_animations->currentText());
-    } catch (const SQCException &ex) {
-        statusBar()->showMessage(ex.message(), 5000);
-    }
+    } catch (const SQCException &ex) {}
 }
 
 void SpriteEditor::_directionSelectionChange ()
@@ -539,9 +571,7 @@ void SpriteEditor::_directionSelectionChange ()
         int n = item->data(QListWidgetItem::UserType).toInt();
         SpriteSelection selection(_sprite->selection().animation(), n);
         _sprite->setSelection(selection);
-    } catch (const SQCException &ex) {
-        statusBar()->showMessage(ex.message(), 5000);
-    }
+    } catch (const SQCException &ex) {}
 }
 
 void SpriteEditor::_directionNewSelection (Rect selection)
@@ -551,10 +581,12 @@ void SpriteEditor::_directionNewSelection (Rect selection)
     } else {
         try {
             SpriteSelection sel(_sprite->selection().animation(), selection);
-            _sprite->setSelection(sel);
-        } catch (const SQCException &ex) {
-            statusBar()->showMessage(ex.message(), 5000);
-        }
+            if (sel.isNewDirection()) {
+                _sprite->setSelection(sel);
+            } else {
+                refreshSelection(_sprite->selection());
+            }
+        } catch (const SQCException &ex) {}
     }
 }
 
@@ -595,9 +627,7 @@ void SpriteEditor::_addDirection ()
             try {
                 selection = SpriteSelection(_sprite->selection().animation());
                 _sprite->setSelection(selection);
-            } catch (const SQCException &ex) {
-                statusBar()->showMessage(ex.message(), 5000);
-            }
+            } catch (const SQCException &ex) {}
         }
     }
 }
@@ -609,9 +639,7 @@ void SpriteEditor::_removeDirection ()
     try {
         animation.removeDirection(n);
         _sprite->setAnimation(animation.name(), animation);
-    } catch (const SQCException &ex) {
-        statusBar()->showMessage(ex.message(), 5000);
-    }
+    } catch (const SQCException &ex) {}
 }
 
 void SpriteEditor::_upDirection ()
@@ -642,4 +670,16 @@ void SpriteEditor::_redo ()
 {
     _sprite->redo();
     _refreshTitle();
+}
+
+void SpriteEditor::_graphicsViewSetZoom (float zoom)
+{
+    _graphicsViewZoom->setCurrentIndex(_graphicsViewZoom->findData(zoom));
+}
+
+void SpriteEditor::_graphicsViewZoomChange ()
+{
+    _graphicsView->setZoom(_graphicsViewZoom->itemData(
+        _graphicsViewZoom->currentIndex()
+    ).toFloat());
 }
