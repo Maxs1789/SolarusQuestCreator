@@ -247,6 +247,7 @@ void SpriteEditor::_initWidgets ()
     QSplitter *splitter = new QSplitter(Qt::Vertical);
     splitter->addWidget(_graphicsView);
     splitter->addWidget(directionWidget);
+    splitter->setStretchFactor(0, 1);
 
     QGridLayout *layout = new QGridLayout;
     layout->addLayout(propertiesLayout, 0, 0, 1, 1, Qt::AlignCenter);
