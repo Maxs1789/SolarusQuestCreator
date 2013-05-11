@@ -23,6 +23,8 @@ SpriteGraphicsView::SpriteGraphicsView ()
 {
     setBackgroundBrush(Qt::lightGray);
     setShowSceneBorder(true);
+    setGridWidth(16);
+    setGridHeight(16);
     setScene(new QGraphicsScene());
     _image = new QGraphicsPixmapItem;
     scene()->addItem(_image);

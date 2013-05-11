@@ -198,6 +198,9 @@ void SQCGraphicsView::mouseReleaseEvent (QMouseEvent *event)
 void SQCGraphicsView::paintEvent (QPaintEvent *event)
 {
     QGraphicsView::paintEvent(event);
+    if (!isEnabled()) {
+        return;
+    }
     QPainter painter(viewport());
     if (_showSceneBorder) {
         QPolygonF polygon = mapFromScene(sceneRect());
