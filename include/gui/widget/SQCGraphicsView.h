@@ -75,24 +75,20 @@ private:
     void _computeSelection ();
     void _snapToGrid (int &x, int &y, const bool &ceil = false);
     void _drawNewSelection (QPainter *painter, const Rect &selection);
-    void _drawComplexSelectionBorder (
+    void _drawComplexSelection (
         QPainter *painter, const ComplexSelection &selection
     );
     void _drawComplexSelectionShadow (
         QPainter *painter, const ComplexSelection &selection
     );
     QPolygonF _complexSelectionBorder(const ComplexSelection &selection);
-    QList<QLineF> _complexSelectionVerticalLines(
+    QList<QLineF> _complexSelectionInnerLines (
         const ComplexSelection &selection
     );
-    QList<QLineF> _complexSelectionHorizontalLines (
+    QPolygonF _getBorderShadow (const QPolygonF &polygon);
+    QList<QPolygonF> _complexSelectionInnerShadows (
         const ComplexSelection &selection
     );
-    void _getBorderShadows (
-        const QPolygonF &polygon, QPolygonF &shadow1, QPolygonF &shadow2
-    );
-    QList<QLineF> _getVerticalLinesShadows(const QList<QLineF> &lines);
-    QList<QLineF> _getHorizontalLinesShadows(const QList<QLineF> &lines);
 };
 
 #endif

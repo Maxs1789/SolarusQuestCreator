@@ -97,7 +97,7 @@ void SQCGraphicsView::paintEvent (QPaintEvent *event)
         }
         painter.setPen(_selectionColor);
         for (int i = 0; i < _selections.size(); i++) {
-            _drawComplexSelectionBorder(&painter, _selections[i]);
+            _drawComplexSelection(&painter, _selections[i]);
         }
     } else if (_inSelection || _keepSelection) {
         _drawNewSelection(&painter, _selection);
@@ -180,44 +180,27 @@ void SQCGraphicsView::_snapToGrid (int &x, int &y, const bool &ceil)
 void SQCGraphicsView::_drawNewSelection (
     QPainter *painter, const Rect &selection
 ) {
-    QPolygon polygon = mapFromScene(
+    ComplexSelection complex = (ComplexSelection){(Rect){
         selection.x, selection.y, selection.width, selection.height
-    );
-    QPoint p = polygon.at(1);
-    p.setX(p.x() - 1);
-    polygon.setPoint(1, p);
-    p = polygon.at(2);
-    p.setX(p.x() - 1);
-    p.setY(p.y() - 1);
-    polygon.setPoint(2, p);
-    p = polygon.at(3);
-    p.setY(p.y() - 1);
-    polygon.setPoint(3, p);
-    QPolygonF shadow1, shadow2;
-    _getBorderShadows(polygon, shadow1, shadow2);
+    }, 1, 1};
     painter->setPen(QColor(0, 0, 0, 85));
-    painter->drawPolygon(shadow1);
-    painter->drawPolygon(shadow2);
+    _drawComplexSelectionShadow(painter, complex);
     painter->setPen(QColor(64, 64, 64));
-    painter->drawPolygon(polygon);
+    _drawComplexSelection(painter, complex);
     QPen pen(Qt::DashLine);
     pen.setColor(Qt::white);
     painter->setPen(pen);
-    painter->drawPolygon(polygon);
+    _drawComplexSelection(painter, complex);
 }
 
-void SQCGraphicsView::_drawComplexSelectionBorder (
+void SQCGraphicsView::_drawComplexSelection (
     QPainter *painter, const ComplexSelection &selection
 ) {
     QPolygonF borderPolygon = _complexSelectionBorder(selection);
-    QList<QLineF> verticalLines = _complexSelectionVerticalLines(selection);
-    QList<QLineF> horizontalLines = _complexSelectionHorizontalLines(selection);
+    QList<QLineF> innerLines = _complexSelectionInnerLines(selection);
     painter->drawPolygon(borderPolygon);
-    for (int i = 0; i < verticalLines.size(); i++) {
-        painter->drawLine(verticalLines[i]);
-    }
-    for (int i = 0; i < horizontalLines.size(); i++) {
-        painter->drawLine(horizontalLines[i]);
+    for (int i = 0; i < innerLines.size(); i++) {
+        painter->drawLine(innerLines[i]);
     }
 }
 
@@ -225,20 +208,11 @@ void SQCGraphicsView::_drawComplexSelectionShadow (
     QPainter *painter, const ComplexSelection &selection
 ) {
     QPolygonF borderPolygon = _complexSelectionBorder(selection);
-    QPolygonF shadow1, shadow2;
-    _getBorderShadows(borderPolygon, shadow1, shadow2);
-    QList<QLineF> verticalLines = _complexSelectionVerticalLines(selection);
-    QList<QLineF> horizontalLines = _complexSelectionHorizontalLines(selection);
-    QList<QLineF> verticalShadows = _getVerticalLinesShadows(verticalLines);
-    QList<QLineF> horizontalShadows;
-    horizontalShadows = _getHorizontalLinesShadows(horizontalLines);
-    painter->drawPolygon(shadow1);
-    painter->drawPolygon(shadow2);
-    for (int i = 0; i < verticalShadows.size(); i++) {
-        painter->drawLine(verticalShadows[i]);
-    }
-    for (int i = 0; i < horizontalShadows.size(); i++) {
-        painter->drawLine(horizontalShadows[i]);
+    QPolygonF shadow = _getBorderShadow(borderPolygon);
+    QList<QPolygonF> innerShadows = _complexSelectionInnerShadows(selection);
+    painter->drawPolygon(shadow);
+    for (int i = 0; i < innerShadows.size(); i++) {
+        painter->drawPolygon(innerShadows[i]);
     }
 }
 
@@ -290,47 +264,34 @@ QPolygonF SQCGraphicsView::_complexSelectionBorder (
     return polygon;
 }
 
-QList<QLineF> SQCGraphicsView::_complexSelectionVerticalLines(
+QList<QLineF> SQCGraphicsView::_complexSelectionInnerLines (
     const ComplexSelection &selection
 ) {
     QList<QLineF> lines;
-    int c = selection.cols;
-    if (c <= 1) {
+    int l = selection.length;
+    if (l <= 1) {
         return lines;
     }
-    int mc = selection.length % c;
+    int c = selection.cols;
+    int mc = l % c;
     int sx = selection.rect.x, sy = selection.rect.y;
-    int sh = selection.rect.height;
-    sh *= (int)(selection.length / c) + 1;
-    if (selection.length < c) {
-        c = selection.length;
-    }
-    for (int i = 1; i < c; i++) {
-        int x = sx + (i * selection.rect.width);
-        int h = sh - (i >= mc ? selection.rect.height : 0);
+    int sw = selection.rect.width, sh = selection.rect.height;
+    int rr = l / c;
+    int rh = sh * (rr + 1);
+    int rc = l < c ? l : c;
+    for (int i = 1; i < rc; i++) {
+        int x = sx + (i * sw);
+        int h = rh - (i >= mc ? sh : 0);
         QLineF line(mapFromScene(x, sy), mapFromScene(x, sy + h));
         QPointF p2 = line.p2(); p2.setY(p2.y() - 1);
         line.setP2(p2);
         line.translate(-1, 0);
         lines.push_back(line);
     }
-    return lines;
-}
-
-QList<QLineF> SQCGraphicsView::_complexSelectionHorizontalLines(
-    const ComplexSelection &selection
-) {
-    QList<QLineF> lines;
-    int l = selection.length, c = selection.cols;
-    if (l <= c) {
-        return lines;
-    }
-    int sx = selection.rect.x, sy = selection.rect.y;
-    int w = selection.rect.width, h = selection.rect.height;
-    for (int i = c; i < l; i++) {
-        int x = sx + ((i % c) * w);
-        int y = sy + ((int)(i / c) * h);
-        QLineF line(mapFromScene(x, y), mapFromScene(x + w, y));
+    int w = sw * rc;
+    for (int i = 1; i <= rr; i++) {
+        int y = sy + (i * sh);
+        QLineF line(mapFromScene(sx, y), mapFromScene(sx + w, y));
         QPointF p = line.p2(); p.setX(p.x() - 1);
         line.setP2(p);
         line.translate(0, -1);
@@ -339,61 +300,51 @@ QList<QLineF> SQCGraphicsView::_complexSelectionHorizontalLines(
     return lines;
 }
 
-void SQCGraphicsView::_getBorderShadows (
-    const QPolygonF &polygon, QPolygonF &shadow1, QPolygonF &shadow2
-) {
+QPolygonF SQCGraphicsView::_getBorderShadow (const QPolygonF &polygon)
+{
+    QPolygonF shadow;
     QPointF p = polygon.at(0);
-    shadow1 << QPointF(p.x() - 1, p.y() - 1);
-    shadow2 << QPointF(p.x() + 1, p.y() + 1);
+    shadow << QPointF(p.x() - 1, p.y() - 1);
     p = polygon.at(1);
-    shadow1 << QPointF(p.x() + 1, p.y() - 1);
-    shadow2 << QPointF(p.x() - 1, p.y() + 1);
+    shadow << QPointF(p.x() + 1, p.y() - 1);
     p = polygon.at(2);
-    shadow1 << QPointF(p.x() + 1, p.y() + 1);
-    shadow2 << QPointF(p.x() - 1, p.y() - 1);
+    shadow << QPointF(p.x() + 1, p.y() + 1);
     if (polygon.size() == 4) {
         p = polygon.at(3);
-        shadow1 << QPointF(p.x() - 1, p.y() + 1);
-        shadow2 << QPointF(p.x() + 1, p.y() - 1);
+        shadow << QPointF(p.x() - 1, p.y() + 1);
     } else {
         p = polygon.at(3);
-        shadow1 << QPointF(p.x() + 1, p.y() + 1);
-        shadow2 << QPointF(p.x() - 1, p.y() - 1);
+        shadow << QPointF(p.x() + 1, p.y() + 1);
         p = polygon.at(4);
-        shadow1 << QPointF(p.x() + 1, p.y() + 1);
-        shadow2 << QPointF(p.x() - 1, p.y() - 1);
+        shadow << QPointF(p.x() + 1, p.y() + 1);
         p = polygon.at(5);
-        shadow1 << QPointF(p.x() - 1, p.y() + 1);
-        shadow2 << QPointF(p.x() + 1, p.y() - 1);
+        shadow << QPointF(p.x() - 1, p.y() + 1);
     }
+    return shadow;
 }
 
-QList<QLineF> SQCGraphicsView::_getVerticalLinesShadows (
-    const QList<QLineF> &lines)
-{
-    QList<QLineF> shadows;
-    for (int i = 0; i < lines.size(); i++) {
-        QPointF p1 = lines[i].p1(), p2 = lines[i].p2();
-        p1.setY(p1.y() + 2); p2.setY(p2.y() - 2);
-        p1.setX(p1.x() - 1); p2.setX(p2.x() - 1);
-        shadows.push_back(QLineF(p1, p2));
-        p1.setX(p1.x() + 2); p2.setX(p2.x() + 2);
-        shadows.push_back(QLineF(p1, p2));
-    }
-    return shadows;
-}
-
-QList<QLineF> SQCGraphicsView::_getHorizontalLinesShadows (
-    const QList<QLineF> &lines
+QList<QPolygonF> SQCGraphicsView::_complexSelectionInnerShadows (
+    const ComplexSelection &selection
 ) {
-    QList<QLineF> shadows;
-    for (int i = 0; i < lines.size(); i++) {
-        QPointF p1 = lines[i].p1(), p2 = lines[i].p2();
-        p1.setX(p1.x() + 2); p2.setX(p2.x() - 2);
-        p1.setY(p1.y() - 1); p2.setY(p2.y() - 1);
-        shadows.push_back(QLineF(p1, p2));
-        p1.setY(p1.y() + 2); p2.setY(p2.y() + 2);
-        shadows.push_back(QLineF(p1, p2));
+    QList<QPolygonF> list;
+    int l = selection.length, c = selection.cols;
+    int sx = selection.rect.x, sy = selection.rect.y;
+    int w = selection.rect.width, h = selection.rect.height;
+    for (int i = 0; i < l; i++) {
+        int x = (i % c) * w;
+        int y = (int)(i / c) * h;
+        QPolygon polygon = mapFromScene(sx + x, sy + y, w, h);
+        QPointF p1 = polygon.at(0);
+        if (x == 0) {
+            p1.setX(p1.x() + 1);
+        }
+        if (y == 0) {
+            p1.setY(p1.y() + 1);
+        }
+        QPointF p2 = polygon.at(2);
+        p2.setX(p2.x() - 2);
+        p2.setY(p2.y() - 2);
+        list.push_back(QRectF(p1, p2));
     }
-    return shadows;
+    return list;
 }
