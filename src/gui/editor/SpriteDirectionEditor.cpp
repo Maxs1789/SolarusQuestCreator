@@ -135,9 +135,7 @@ void SpriteDirectionEditor::_refreshWidgets (const SpriteDirection &direction)
     _width->setValue(direction.width());
     _height->setValue(direction.height());
     _originX->setValue(direction.originX());
-    _originX->setMaximum(direction.width());
     _originY->setValue(direction.originY());
-    _originY->setMaximum(direction.height());
     _nbFrames->setValue(direction.nbFrames());
     _nbColumns->setValue(direction.nbColumns());
 }

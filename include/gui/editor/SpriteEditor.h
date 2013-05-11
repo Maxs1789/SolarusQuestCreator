@@ -77,7 +77,8 @@ private:
     SpriteDirectionPreview *_directionPreview;
     int _animCount;
     QPixmap _currentImage;
-    ColorButton *_colorButton;
+    ColorButton *_selColor;
+    ColorButton *_backColor;
     QComboBox *_graphicsViewZoom;
     QAction *_actionSceneBorder;
     QAction *_actionShowGrid;
@@ -129,6 +130,10 @@ private slots:
 
     void _graphicsViewSetZoom (float zoom);
     void _graphicsViewZoomChange ();
+
+    void _snapEnabled (bool enable);
+
+    void _backColorChange (QColor color);
 };
 
 #endif

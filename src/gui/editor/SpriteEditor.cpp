@@ -200,13 +200,19 @@ void SpriteEditor::_initWidgets ()
     _animations->setEditable(true);
     _animations->setEnabled(false);
     _graphicsView->setMakeSelection(true);
+    _addAnimationButton->setToolTip(tr("Add animation"));
     _addAnimationButton->setMaximumSize(24, 24);
+    _removeAnimationButton->setToolTip(tr("Remove animation"));
     _removeAnimationButton->setMaximumSize(24, 24);
     _removeAnimationButton->setEnabled(false);
+    _addDirectionButton->setToolTip(tr("Add direction"));
     _addDirectionButton->setMaximumSize(24, 24);
     _addDirectionButton->setCheckable(true);
+    _removeDirectionButton->setToolTip(tr("Remove direction"));
     _removeDirectionButton->setMaximumSize(24, 24);
+    _upDirectionButton->setToolTip(tr("Up direction"));
     _upDirectionButton->setMaximumSize(24, 24);
+    _downDirectionButton->setToolTip(tr("Down direction"));
     _downDirectionButton->setMaximumSize(24, 24);
     _removeDirectionButton->setEnabled(false);
     _upDirectionButton->setEnabled(false);
@@ -278,13 +284,12 @@ void SpriteEditor::_initToolBar ()
     _actionUndo = toolBar->addAction(QIcon(":fugue/undo"), "");
     _actionRedo = toolBar->addAction(QIcon(":fugue/redo"), "");
 
-    toolBar->addSeparator();
     toolBar->addWidget(spacer1);
-    toolBar->addSeparator();
 
     _gridWidth = new QSpinBox;
     _gridHeight = new QSpinBox;
-    _colorButton = new ColorButton;
+    _selColor = new ColorButton;
+    _backColor = new ColorButton(Qt::lightGray);
     _graphicsViewZoom = new QComboBox;
 
     _gridWidth->setMinimum(1);
@@ -293,7 +298,8 @@ void SpriteEditor::_initToolBar ()
     _gridHeight->setMinimum(1);
     _gridHeight->setSingleStep(4);
     _gridHeight->setValue(_graphicsView->gridHeight());
-    _colorButton->setColor(_graphicsView->selectionColor());
+    _snapEnabled(_graphicsView->snap());
+    _selColor->setColor(_graphicsView->selectionColor());
     _graphicsViewZoom->addItem("800%", 8.0);
     _graphicsViewZoom->addItem("400%", 4.0);
     _graphicsViewZoom->addItem("200%", 2.0);
@@ -303,6 +309,7 @@ void SpriteEditor::_initToolBar ()
     _graphicsViewZoom->setCurrentIndex(
         _graphicsViewZoom->findData(_graphicsView->zoom())
     );
+    _graphicsViewZoom->setToolTip(tr("Zoom"));
 
     _actionSceneBorder = toolBar->addAction(
         QIcon(":graphics/scene_border"), ""
@@ -318,8 +325,10 @@ void SpriteEditor::_initToolBar ()
     toolBar->addWidget(_gridHeight);
     toolBar->addSeparator();
 
-    //toolBar->addWidget(_colorButton);
-    //toolBar->addSeparator();
+    toolBar->addWidget(_selColor);
+    toolBar->addSeparator();
+    toolBar->addWidget(_backColor);
+    toolBar->addSeparator();
     toolBar->addWidget(_graphicsViewZoom);
 
     toolBar->addWidget(spacer4);
@@ -341,6 +350,8 @@ void SpriteEditor::_initToolBar ()
     _actionSnapGrid->setToolTip(tr("Snap to grid"));
     _actionSnapGrid->setCheckable(true);
     _actionSnapGrid->setChecked(_graphicsView->snap());
+    _selColor->setToolTip(tr("Selection color"));
+    _backColor->setToolTip(tr("Background color"));
 }
 
 void SpriteEditor::_connects ()
@@ -406,7 +417,7 @@ void SpriteEditor::_connects ()
     connect(_actionUndo, SIGNAL(triggered()), this, SLOT(_undo()));
     connect(_actionRedo, SIGNAL(triggered()), this, SLOT(_redo()));
     connect(
-        _colorButton, SIGNAL(colorChange(QColor)),
+        _selColor, SIGNAL(colorChange(QColor)),
         _graphicsView, SLOT(setSelectionColor(QColor))
     );
     connect(
@@ -428,6 +439,9 @@ void SpriteEditor::_connects ()
     connect(
         _graphicsView, SIGNAL(snapChange(bool)),
         _actionSnapGrid, SLOT(setChecked(bool))
+    );
+    connect(
+        _graphicsView, SIGNAL(snapChange(bool)), this, SLOT(_snapEnabled(bool))
     );
     connect(
         _actionSnapGrid, SIGNAL(toggled(bool)),
@@ -452,6 +466,10 @@ void SpriteEditor::_connects ()
     connect(
         _graphicsView, SIGNAL(zoomChange(float)),
         this, SLOT(_graphicsViewSetZoom(float))
+    );
+    connect(
+        _backColor, SIGNAL(colorChange(QColor)),
+        this, SLOT(_backColorChange(QColor))
     );
     connect(
         _graphicsViewZoom, SIGNAL(currentIndexChanged(int)),
@@ -765,4 +783,15 @@ void SpriteEditor::_graphicsViewZoomChange ()
     _graphicsView->setZoom(_graphicsViewZoom->itemData(
         _graphicsViewZoom->currentIndex()
     ).toFloat());
+}
+
+void SpriteEditor::_snapEnabled (bool enable)
+{
+    _gridWidth->setEnabled(enable);
+    _gridHeight->setEnabled(enable);
+}
+
+void SpriteEditor::_backColorChange (QColor color)
+{
+    _graphicsView->setBackgroundBrush(color);
 }

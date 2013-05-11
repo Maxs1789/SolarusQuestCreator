@@ -23,7 +23,8 @@
 
 class QPushButton;
 class QLabel;
-class SQCGraphicsView;
+class SpriteDirectionGraphicsView;
+class ColorButton;
 
 class SpriteDirectionPreview : public QWidget
 {
@@ -42,7 +43,7 @@ protected:
 private:
     QPixmap _pix;
     SpriteDirection _direction;
-    SQCGraphicsView *_graphicsView;
+    SpriteDirectionGraphicsView *_graphicsView;
     QLabel *_frame;
     QPushButton *_play;
     QPushButton *_next;
@@ -55,6 +56,10 @@ private:
     int _frameDelay;
     int _frameOnLoop;
     QTimer _timer;
+    QAction *_actionOriginPoint;
+    QAction *_actionOriginCross;
+    ColorButton *_selColor;
+    ColorButton *_backColor;
 
     void _initWidgets ();
     void _connects ();
@@ -70,6 +75,10 @@ private slots:
     void _firstAction ();
 
     void _step ();
+
+    void _originPointChange (bool point);
+    void _originCrossChange (bool cross);
+    void _backColorChange (QColor color);
 };
 
 #endif

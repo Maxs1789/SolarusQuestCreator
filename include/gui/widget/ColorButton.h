@@ -48,9 +48,10 @@ private:
 
     void _refresh ()
     {
-        QString style = "border:1px solid gray;border-radius:3px;";
-        style += "margin:5px;max-width:24px;max-height:16px;";
-        setStyleSheet(style + "background-color:" + _color.name());
+        QString style = "QPushButton{border:1px solid gray;border-radius:3px;";
+        style += "margin:5px;max-width:24px;max-height:16px;background-color:";
+        style += _color.name() + "}";
+        setStyleSheet(style);
     }
 
 private slots:

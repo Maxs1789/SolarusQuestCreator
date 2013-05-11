@@ -19,8 +19,11 @@
 #include <QGridLayout>
 #include <QGraphicsPixmapItem>
 #include <QEvent>
+#include <QToolBar>
+#include <QAction>
 #include "gui/widget/SpriteDirectionPreview.h"
-#include "gui/widget/SQCGraphicsView.h"
+#include "gui/widget/SpriteDirectionGraphicsView.h"
+#include "gui/widget/ColorButton.h"
 
 SpriteDirectionPreview::SpriteDirectionPreview () :
     _currentFrame(0),
@@ -68,7 +71,7 @@ void SpriteDirectionPreview::changeEvent (QEvent *event)
 
 void SpriteDirectionPreview::_initWidgets ()
 {
-    _graphicsView = new SQCGraphicsView;
+    _graphicsView = new SpriteDirectionGraphicsView;
     _frame = new QLabel;
     _play = new QPushButton(QIcon(":media/play"), "");
     _next = new QPushButton(QIcon(":media/next"), "");
@@ -76,19 +79,28 @@ void SpriteDirectionPreview::_initWidgets ()
     _stop = new QPushButton(QIcon(":media/stop"), "");
     _first = new QPushButton(QIcon(":media/first"), "");
     _last = new QPushButton(QIcon(":media/last"), "");
+    _backColor = new ColorButton(Qt::lightGray);
+    _selColor = new ColorButton(_graphicsView->selectionColor());
 
     _frame->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     _frame->setLineWidth(1);
     _frame->setAlignment(Qt::AlignCenter);
     _frame->setMargin(3);
     _graphicsView->setScene(new QGraphicsScene());
-    _graphicsView->setBackgroundBrush(QBrush(Qt::lightGray));
+    _graphicsView->setBackgroundBrush(Qt::lightGray);
     _play->setMaximumSize(24, 24);
+    _next->setToolTip(tr("Next frame"));
     _next->setMaximumSize(24, 24);
+    _prev->setToolTip(tr("Previous frame"));
     _prev->setMaximumSize(24, 24);
+    _stop->setToolTip(tr("Stop"));
     _stop->setMaximumSize(24, 24);
+    _first->setToolTip(tr("First frame"));
     _first->setMaximumSize(24, 24);
+    _last->setToolTip(tr("Last frame"));
     _last->setMaximumSize(24, 24);
+    _backColor->setToolTip(tr("Background color"));
+    _selColor->setToolTip(tr("Selection color"));
 
     QHBoxLayout *buttonLayout = new QHBoxLayout;
     buttonLayout->addWidget(_play);
@@ -99,11 +111,35 @@ void SpriteDirectionPreview::_initWidgets ()
     buttonLayout->addWidget(_last);
     buttonLayout->addWidget(_stop);
 
+    QToolBar *toolBar = new QToolBar;
+    _actionOriginPoint = toolBar->addAction(
+        QIcon(":/graphics/origin_point"), ""
+    );
+    _actionOriginCross = toolBar->addAction(
+        QIcon(":/graphics/origin_cross"), ""
+    );
+    toolBar->addSeparator();
+    toolBar->addWidget(_selColor);
+    toolBar->addSeparator();
+    toolBar->addWidget(_backColor);
+    _actionOriginPoint->setToolTip(tr("Origin point"));
+    _actionOriginPoint->setCheckable(true);
+    _actionOriginPoint->setChecked(_graphicsView->point());
+    _actionOriginCross->setToolTip(tr("Origin cross"));
+    _actionOriginCross->setCheckable(true);
+    _actionOriginCross->setChecked(_graphicsView->cross());
+    toolBar->setOrientation(Qt::Vertical);
+    toolBar->setMovable(false);
+
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(_graphicsView);
     layout->addLayout(buttonLayout);
     layout->setAlignment(buttonLayout, Qt::AlignCenter);
-    setLayout(layout);
+
+    QHBoxLayout *toolLayout = new QHBoxLayout;
+    toolLayout->addWidget(toolBar);
+    toolLayout->addLayout(layout);
+    setLayout(toolLayout);
 }
 
 void SpriteDirectionPreview::_connects ()
@@ -115,6 +151,22 @@ void SpriteDirectionPreview::_connects ()
     connect(_last, SIGNAL(clicked()), this, SLOT(_lastAction()));
     connect(_first, SIGNAL(clicked()), this, SLOT(_firstAction()));
     connect(&_timer, SIGNAL(timeout()), this, SLOT(_step()));
+    connect(
+        _actionOriginPoint, SIGNAL(toggled(bool)),
+        this, SLOT(_originPointChange(bool))
+    );
+    connect(
+        _actionOriginCross, SIGNAL(toggled(bool)),
+        this, SLOT(_originCrossChange(bool))
+    );
+    connect(
+        _selColor, SIGNAL(colorChange(QColor)),
+        _graphicsView, SLOT(setSelectionColor(QColor))
+    );
+    connect(
+        _backColor, SIGNAL(colorChange(QColor)),
+        this, SLOT(_backColorChange(QColor))
+    );
 }
 
 void SpriteDirectionPreview::_refreshView ()
@@ -125,8 +177,10 @@ void SpriteDirectionPreview::_refreshView ()
     );
     if (_inPlaying) {
         _play->setIcon(QIcon(":media/pause"));
+        _play->setToolTip(tr("Pause"));
     } else {
         _play->setIcon(QIcon(":media/play"));
+        _play->setToolTip(tr("Play"));
     }
     _play->setEnabled(nbFrames > 1 && _frameDelay > 0);
     _stop->setEnabled(_inPlaying);
@@ -144,8 +198,7 @@ void SpriteDirectionPreview::_refreshView ()
     QPixmap pix = _pix.copy(x, y, w, h);
     _graphicsView->scene()->addItem(new QGraphicsPixmapItem(pix));
     _graphicsView->scene()->setSceneRect(pix.rect());
-    int ox = _direction.originX(), oy = _direction.originY();
-    _graphicsView->scene()->addRect(ox, oy, 1, 1, QPen(Qt::red));
+    _graphicsView->setOrigin(_direction.originX(), _direction.originY());
 }
 
 void SpriteDirectionPreview::_playAction ()
@@ -205,4 +258,33 @@ void SpriteDirectionPreview::_step ()
         }
     }
     _refreshView();
+}
+
+void SpriteDirectionPreview::_originPointChange (bool point)
+{
+    if (point) {
+        _actionOriginCross->blockSignals(true);
+        _graphicsView->showOriginPoint(true);
+        _actionOriginCross->setChecked(false);
+        _actionOriginCross->blockSignals(false);
+    } else {
+        _graphicsView->showOrigin(false);
+    }
+}
+
+void SpriteDirectionPreview::_originCrossChange (bool cross)
+{
+    if (cross) {
+        _actionOriginPoint->blockSignals(true);
+        _graphicsView->showOriginCross(true);
+        _actionOriginPoint->setChecked(false);
+        _actionOriginPoint->blockSignals(false);
+    } else {
+        _graphicsView->showOrigin(false);
+    }
+}
+
+void SpriteDirectionPreview::_backColorChange (QColor color)
+{
+    _graphicsView->setBackgroundBrush(color);
 }
