@@ -59,4 +59,11 @@
         <file alias="first">icon/media/control-stop-180.png</file>
         <file alias="stop">icon/media/control-stop-square.png</file>
     </qresource>
+    <qresource prefix="/graphics">
+        <file alias="grid">icon/graphics/grid.png</file>
+        <file alias="origin_cross">icon/graphics/origin_cross.png</file>
+        <file alias="origin_point">icon/graphics/origin_point.png</file>
+        <file alias="scene_border">icon/graphics/scene_border.png</file>
+        <file alias="snap">icon/graphics/snap_to_grid.png</file>
+    </qresource>
 </RCC>

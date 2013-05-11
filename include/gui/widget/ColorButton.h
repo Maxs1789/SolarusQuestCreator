@@ -24,7 +24,7 @@ class ColorButton : public QPushButton
 {
     Q_OBJECT
 public:
-    ColorButton (QColor color) :
+    ColorButton (QColor color = Qt::white) :
         _color(color)
     {
         _refresh();

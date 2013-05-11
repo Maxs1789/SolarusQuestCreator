@@ -27,6 +27,7 @@ class QPushButton;
 class QGraphicsView;
 class QListWidget;
 class QGroupBox;
+class QSpinBox;
 class ColorButton;
 class SpriteGraphicsView;
 class SpriteAnimationEditor;
@@ -78,6 +79,11 @@ private:
     QPixmap _currentImage;
     ColorButton *_colorButton;
     QComboBox *_graphicsViewZoom;
+    QAction *_actionSceneBorder;
+    QAction *_actionShowGrid;
+    QAction *_actionSnapGrid;
+    QSpinBox *_gridWidth;
+    QSpinBox *_gridHeight;
 
     void _initWidgets ();
     void _initToolBar ();

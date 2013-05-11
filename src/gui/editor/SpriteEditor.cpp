@@ -28,6 +28,7 @@
 #include <QAction>
 #include <QMessageBox>
 #include <QSplitter>
+#include <QSpinBox>
 #include "gui/widget/SpriteGraphicsView.h"
 #include "gui/editor/SpriteEditor.h"
 #include "gui/editor/SpriteAnimationEditor.h"
@@ -265,8 +266,11 @@ void SpriteEditor::_initWidgets ()
 void SpriteEditor::_initToolBar ()
 {
     QWidget *spacer1 = new QWidget, *spacer2 = new QWidget;
+    QWidget *spacer3 = new QWidget, *spacer4 = new QWidget;
     spacer1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     spacer2->setMinimumWidth(10);
+    spacer3->setMinimumWidth(10);
+    spacer4->setMinimumWidth(10);
 
     QToolBar *toolBar = addToolBar("");
     _actionSave = toolBar->addAction(QIcon(":fugue/save"), "");
@@ -278,27 +282,65 @@ void SpriteEditor::_initToolBar ()
     toolBar->addWidget(spacer1);
     toolBar->addSeparator();
 
-    _colorButton = new ColorButton(Qt::blue);
+    _gridWidth = new QSpinBox;
+    _gridHeight = new QSpinBox;
+    _colorButton = new ColorButton;
     _graphicsViewZoom = new QComboBox;
 
+    _gridWidth->setMinimum(1);
+    _gridWidth->setSingleStep(4);
+    _gridWidth->setValue(_graphicsView->gridWidth());
+    _gridHeight->setMinimum(1);
+    _gridHeight->setSingleStep(4);
+    _gridHeight->setValue(_graphicsView->gridHeight());
+    _colorButton->setColor(_graphicsView->selectionColor());
     _graphicsViewZoom->addItem("800%", 8.0);
     _graphicsViewZoom->addItem("400%", 4.0);
     _graphicsViewZoom->addItem("200%", 2.0);
     _graphicsViewZoom->addItem("100%", 1.0);
     _graphicsViewZoom->addItem("50%", 0.5);
     _graphicsViewZoom->addItem("25%", 0.25);
-    _graphicsViewZoom->setCurrentIndex(3);
+    _graphicsViewZoom->setCurrentIndex(
+        _graphicsViewZoom->findData(_graphicsView->zoom())
+    );
 
-    toolBar->addWidget(_colorButton);
+    _actionSceneBorder = toolBar->addAction(
+        QIcon(":graphics/scene_border"), ""
+    );
+    _actionShowGrid = toolBar->addAction(QIcon(":graphics/grid"), "");
     toolBar->addSeparator();
+    _actionSnapGrid = toolBar->addAction(QIcon(":graphics/snap"), "");
+    toolBar->addWidget(spacer2);
+    toolBar->addWidget(new QLabel(tr("Width:")));
+    toolBar->addWidget(_gridWidth);
+    toolBar->addWidget(spacer3);
+    toolBar->addWidget(new QLabel(tr("Height:")));
+    toolBar->addWidget(_gridHeight);
+    toolBar->addSeparator();
+
+    //toolBar->addWidget(_colorButton);
+    //toolBar->addSeparator();
     toolBar->addWidget(_graphicsViewZoom);
 
-    toolBar->addWidget(spacer2);
+    toolBar->addWidget(spacer4);
     toolBar->setMovable(false);
 
+    _actionSave->setToolTip(tr("Save"));
     _actionSave->setEnabled(false);
+    _actionUndo->setToolTip(tr("Undo"));
     _actionUndo->setEnabled(false);
+    _actionRedo->setToolTip(tr("Redo"));
     _actionRedo->setEnabled(false);
+
+    _actionSceneBorder->setToolTip(tr("Show scene border"));
+    _actionSceneBorder->setCheckable(true);
+    _actionSceneBorder->setChecked(_graphicsView->showSceneBorder());
+    _actionShowGrid->setToolTip(tr("Show grid"));
+    _actionShowGrid->setCheckable(true);
+    _actionShowGrid->setChecked(_graphicsView->showGrid());
+    _actionSnapGrid->setToolTip(tr("Snap to grid"));
+    _actionSnapGrid->setCheckable(true);
+    _actionSnapGrid->setChecked(_graphicsView->snap());
 }
 
 void SpriteEditor::_connects ()
@@ -366,6 +408,46 @@ void SpriteEditor::_connects ()
     connect(
         _colorButton, SIGNAL(colorChange(QColor)),
         _graphicsView, SLOT(setSelectionColor(QColor))
+    );
+    connect(
+        _graphicsView, SIGNAL(showSceneBorderChange(bool)),
+        _actionSceneBorder, SLOT(setChecked(bool))
+    );
+    connect(
+        _actionSceneBorder, SIGNAL(toggled(bool)),
+        _graphicsView, SLOT(setShowSceneBorder(bool))
+    );
+    connect(
+        _graphicsView, SIGNAL(showGridChange(bool)),
+        _actionShowGrid, SLOT(setChecked(bool))
+    );
+    connect(
+        _actionShowGrid, SIGNAL(toggled(bool)),
+        _graphicsView, SLOT(setShowGrid(bool))
+    );
+    connect(
+        _graphicsView, SIGNAL(snapChange(bool)),
+        _actionSnapGrid, SLOT(setChecked(bool))
+    );
+    connect(
+        _actionSnapGrid, SIGNAL(toggled(bool)),
+        _graphicsView, SLOT(setSnap(bool))
+    );
+    connect(
+        _graphicsView, SIGNAL(gridWidthChange(int)),
+        _gridWidth, SLOT(setValue(int))
+    );
+    connect(
+        _gridWidth, SIGNAL(valueChanged(int)),
+        _graphicsView, SLOT(setGridWidth(int))
+    );
+    connect(
+        _graphicsView, SIGNAL(gridHeightChange(int)),
+        _gridHeight, SLOT(setValue(int))
+    );
+    connect(
+        _gridHeight, SIGNAL(valueChanged(int)),
+        _graphicsView, SLOT(setGridHeight(int))
     );
     connect(
         _graphicsView, SIGNAL(zoomChange(float)),

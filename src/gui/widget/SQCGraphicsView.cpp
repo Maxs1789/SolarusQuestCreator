@@ -31,7 +31,8 @@ SQCGraphicsView::SQCGraphicsView () :
     _gridH(8),
     _selectionColor(Qt::blue),
     _showSceneBorder(false),
-    _snap(true)
+    _snap(true),
+    _showGrid(false)
 {
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 }
@@ -39,6 +40,46 @@ SQCGraphicsView::SQCGraphicsView () :
 void SQCGraphicsView::setMakeSelection (bool canMake)
 {
     _canMakeSelection = canMake;
+}
+
+bool SQCGraphicsView::canMakeSelection () const
+{
+    return _canMakeSelection;
+}
+
+float SQCGraphicsView::zoom () const
+{
+    return _zoom;
+}
+
+QColor SQCGraphicsView::selectionColor () const
+{
+    return _selectionColor;
+}
+
+bool SQCGraphicsView::showSceneBorder () const
+{
+    return _showSceneBorder;
+}
+
+bool SQCGraphicsView::showGrid () const
+{
+    return _showGrid;
+}
+
+bool SQCGraphicsView::snap () const
+{
+    return _snap;
+}
+
+int SQCGraphicsView::gridWidth () const
+{
+    return _gridW;
+}
+
+int SQCGraphicsView::gridHeight () const
+{
+    return _gridH;
 }
 
 void SQCGraphicsView::setZoom (float zoom)
@@ -54,27 +95,60 @@ void SQCGraphicsView::setZoom (float zoom)
 
 void SQCGraphicsView::setSelectionColor (QColor color)
 {
-    _selectionColor = color;
+    if (color != _selectionColor) {
+        _selectionColor = color;
+        viewport()->update();
+    }
 }
 
 void SQCGraphicsView::setShowSceneBorder (bool show)
 {
-    _showSceneBorder = show;
+    if (show != _showSceneBorder) {
+        _showSceneBorder = show;
+        viewport()->update();
+        emit showSceneBorderChange(show);
+    }
+}
+
+void SQCGraphicsView::setShowGrid (bool show)
+{
+    if (show != _showGrid) {
+        _showGrid = show;
+        viewport()->update();
+        emit showGridChange(show);
+    }
 }
 
 void SQCGraphicsView::setSnap (bool snap)
 {
-    _snap = snap;
+    if (snap != _snap) {
+        _snap = snap;
+        emit snapChange(snap);
+    }
 }
 
 void SQCGraphicsView::setGridWidth (int width)
 {
-    _gridW = width < 1 ? 1 : width;
+    if (width < 1) {
+        width = 1;
+    }
+    if (width != _gridW) {
+        _gridW = width;
+        viewport()->update();
+        emit gridWidthChange(width);
+    }
 }
 
 void SQCGraphicsView::setGridHeight (int height)
 {
-    _gridH = height < 1 ? 1 : height;
+    if (height < 1) {
+        height = 1;
+    }
+    if (height != _gridH) {
+        _gridH = height;
+        viewport()->update();
+        emit gridHeightChange(height);
+    }
 }
 
 void SQCGraphicsView::mousePressEvent (QMouseEvent *event)
@@ -128,6 +202,16 @@ void SQCGraphicsView::paintEvent (QPaintEvent *event)
     if (_showSceneBorder) {
         QPolygonF polygon = mapFromScene(sceneRect());
         painter.drawRect(polygon.boundingRect().adjusted(-1, -1, 0, 0));
+    }
+    if (_showGrid) {
+        painter.setPen(QColor(64, 64, 64, 128));
+        int w = sceneRect().width(), h = sceneRect().height();
+        for (int x = _gridW; x < w; x += _gridW) {
+            painter.drawLine(mapFromScene(x, 0), mapFromScene(x, h));
+        }
+        for (int y = _gridH; y < h; y += _gridH) {
+            painter.drawLine(mapFromScene(0, y), mapFromScene(w, y));
+        }
     }
     if (_selections.size()) {
         QColor shadowColor = _selectionColor;
