@@ -23,7 +23,7 @@ class SpriteGraphicsView : public SQCGraphicsView
 {
     Q_OBJECT
 public:
-    SpriteGraphicsView ();
+    SpriteGraphicsView (QStatusBar *statusBar = 0);
 
     void setImage (const QPixmap &image);
     void setSelection (

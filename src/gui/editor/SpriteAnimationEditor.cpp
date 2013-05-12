@@ -89,6 +89,7 @@ void SpriteAnimationEditor::_initWidgets ()
     _image->setEnabled(false);
     _frameOnLoop->setMinimum(-1);
     _frameDelay->setMaximum(10000);
+    _imageButton->setToolTip(tr("Change image"));
     _imageButton->setMaximumSize(24, 24);
 
     _frameDelay->setSingleStep(50);

@@ -19,9 +19,11 @@
 #include "sol/SpriteSelection.h"
 #include "sol/SpriteAnimation.h"
 
-SpriteGraphicsView::SpriteGraphicsView ()
+SpriteGraphicsView::SpriteGraphicsView (QStatusBar *statusBar) :
+    SQCGraphicsView(statusBar)
 {
     setBackgroundBrush(Qt::lightGray);
+    setMouseTracking(true);
     setShowSceneBorder(true);
     setGridWidth(16);
     setGridHeight(16);

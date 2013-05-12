@@ -22,11 +22,13 @@
 #include <QApplication>
 #include "sol/types.h"
 
+class QStatusBar;
+
 class SQCGraphicsView : public QGraphicsView
 {
     Q_OBJECT
 public:
-    SQCGraphicsView ();
+    SQCGraphicsView (QStatusBar *statusBar = 0);
 
     void setMakeSelection (bool canMake);
 
@@ -97,6 +99,8 @@ private:
     bool _showSceneBorder;
     bool _showGrid;
     bool _snap;
+    int _mx, _my;
+    QStatusBar *_statusBar;
 
     void _computeSelection ();
     void _snapToGrid (int &x, int &y, const bool &ceil = false);
@@ -115,6 +119,8 @@ private:
     QList<QPolygonF> _complexSelectionInnerShadows (
         const ComplexSelection &selection
     );
+
+    void _refreshStatusBar ();
 };
 
 #endif

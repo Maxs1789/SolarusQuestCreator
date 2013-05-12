@@ -29,6 +29,7 @@
 #include <QMessageBox>
 #include <QSplitter>
 #include <QSpinBox>
+#include <QStatusBar>
 #include "gui/widget/SpriteGraphicsView.h"
 #include "gui/editor/SpriteEditor.h"
 #include "gui/editor/SpriteAnimationEditor.h"
@@ -182,7 +183,8 @@ void SpriteEditor::_initWidgets ()
     _id = new QLabel;
     _name = new QLineEdit;
     _animations = new QComboBox;
-    _graphicsView = new SpriteGraphicsView;
+    QStatusBar *statusBar = new QStatusBar;
+    _graphicsView = new SpriteGraphicsView(statusBar);
     _animationEditor = new SpriteAnimationEditor(_quest);
     _directions = new QListWidget;
     _directionEditor = new SpriteDirectionEditor;
@@ -251,8 +253,14 @@ void SpriteEditor::_initWidgets ()
     directionLayout->addWidget(_directionPreview);
     directionWidget->setLayout(directionLayout);
 
+    QWidget *graphicWidget = new QWidget;
+    QVBoxLayout *graphicLayout = new QVBoxLayout;
+    graphicLayout->addWidget(_graphicsView);
+    graphicLayout->addWidget(statusBar);
+    graphicWidget->setLayout(graphicLayout);
+
     QSplitter *splitter = new QSplitter(Qt::Vertical);
-    splitter->addWidget(_graphicsView);
+    splitter->addWidget(graphicWidget);
     splitter->addWidget(directionWidget);
     splitter->setStretchFactor(0, 1);
 
@@ -293,10 +301,10 @@ void SpriteEditor::_initToolBar ()
     _graphicsViewZoom = new QComboBox;
 
     _gridWidth->setMinimum(1);
-    _gridWidth->setSingleStep(4);
+    _gridWidth->setSingleStep(8);
     _gridWidth->setValue(_graphicsView->gridWidth());
     _gridHeight->setMinimum(1);
-    _gridHeight->setSingleStep(4);
+    _gridHeight->setSingleStep(8);
     _gridHeight->setValue(_graphicsView->gridHeight());
     _snapEnabled(_graphicsView->snap());
     _selColor->setColor(_graphicsView->selectionColor());

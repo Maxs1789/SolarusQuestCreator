@@ -16,9 +16,10 @@
  */
 #include <QKeyEvent>
 #include <QWheelEvent>
+#include <QStatusBar>
 #include "gui/widget/SQCGraphicsView.h"
 
-SQCGraphicsView::SQCGraphicsView () :
+SQCGraphicsView::SQCGraphicsView (QStatusBar *statusBar) :
     _zoom(1.0),
     _zoomMin(0.25),
     _zoomMax(8.0),
@@ -32,7 +33,8 @@ SQCGraphicsView::SQCGraphicsView () :
     _selectionColor(Qt::blue),
     _showSceneBorder(false),
     _snap(true),
-    _showGrid(false)
+    _showGrid(false),
+    _statusBar(statusBar)
 {
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 }
@@ -163,17 +165,21 @@ void SQCGraphicsView::mousePressEvent (QMouseEvent *event)
         }
         _computeSelection();
         _inSelection = true;
+        _refreshStatusBar();
         viewport()->repaint();
     }
 }
 
 void SQCGraphicsView::mouseMoveEvent (QMouseEvent *event)
 {
+    QPointF pos = mapToScene(event->pos());
+    _mx = pos.x(); _my = pos.y();
+    if (_snap) {
+        _snapToGrid(_mx, _my);
+    }
     if (_inSelection) {
-        QPointF pos = mapToScene(event->pos());
-        _x2 = pos.x(); _y2 = pos.y();
+        _x2 = _mx; _y2 = _my;
         if (_snap) {
-            _snapToGrid(_x2, _y2);
             if (_x2 >= _x1) {
                 _x2 += _gridW;
             }
@@ -184,6 +190,7 @@ void SQCGraphicsView::mouseMoveEvent (QMouseEvent *event)
         _computeSelection();
         viewport()->repaint();
     }
+    _refreshStatusBar();
 }
 
 void SQCGraphicsView::mouseReleaseEvent (QMouseEvent *event)
@@ -463,4 +470,25 @@ QList<QPolygonF> SQCGraphicsView::_complexSelectionInnerShadows (
         list.push_back(QRectF(p1, p2));
     }
     return list;
+}
+
+void SQCGraphicsView::_refreshStatusBar ()
+{
+    if (_statusBar == 0) {
+        return;
+    }
+    _statusBar->clearMessage();
+    QString msg;
+    if (_inSelection) {
+        msg = QString::number(_selection.x);
+        msg += ";" + QString::number(_selection.y);
+        msg += " - " + QString::number(_selection.width);
+        msg += "x" + QString::number(_selection.height);
+    } else {
+        msg = QString::number(_mx);
+        msg += ";" + QString::number(_my);
+    }
+    if (msg != _statusBar->currentMessage()) {
+        _statusBar->showMessage(msg);
+    }
 }
