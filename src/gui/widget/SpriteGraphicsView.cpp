@@ -45,9 +45,15 @@ void SpriteGraphicsView::setSelection (
     if (selection.haveDirection()) {
         int dir = selection.direction();
         SpriteDirection direction = animation.direction(dir);
-        addToSelection((ComplexSelection){(Rect){
-            direction.x(), direction.y(), direction.width(), direction.height()
-        }, direction.nbFrames(), direction.nbColumns()});
+        int x = direction.x(), y = direction.y();
+        int w = direction.width(), h = direction.height();
+        int nf = direction.nbFrames(), nc = direction.nbColumns();
+        addToSelection((ComplexSelection){(Rect){x, y, w, h}, nf, nc});
+        if (nf < nc) {
+            nc = nf;
+        }
+        int nr = nf / nc;
+        ensureVisible(x, y, w * nc, h * nr);
     } else if (selection.isNewDirection()) {
         setNewSelection(selection.newDirection());
         keepSelection();
