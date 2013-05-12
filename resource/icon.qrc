@@ -44,7 +44,6 @@
         <file alias="dir">icon/folder-horizontal.png</file>
         <file alias="redo">icon/arrow-curve.png</file>
         <file alias="undo">icon/arrow-curve-180-left.png</file>
-        <file alias="save">icon/disk-return-black.png</file>
     </qresource>
     <qresource prefix="/media">
         <file alias="prev">icon/media/previous.png</file>
@@ -67,5 +66,6 @@
         <file alias="remove">icon/menu/remove.png</file>
         <file alias="up">icon/menu/up.png</file>
         <file alias="down">icon/menu/down.png</file>
+        <file alias="save">icon/menu/save.png</file>
     </qresource>
 </RCC>

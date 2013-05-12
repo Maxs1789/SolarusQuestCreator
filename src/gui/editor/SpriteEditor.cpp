@@ -287,7 +287,7 @@ void SpriteEditor::_initToolBar ()
     spacer4->setMinimumWidth(10);
 
     QToolBar *toolBar = addToolBar("");
-    _actionSave = toolBar->addAction(QIcon(":fugue/save"), "");
+    _actionSave = toolBar->addAction(QIcon(":menu/save"), "");
     toolBar->addSeparator();
     _actionUndo = toolBar->addAction(QIcon(":fugue/undo"), "");
     _actionRedo = toolBar->addAction(QIcon(":fugue/redo"), "");
