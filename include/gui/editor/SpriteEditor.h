@@ -128,8 +128,8 @@ private slots:
     void _undo ();
     void _redo ();
 
-    void _graphicsViewSetZoom (float zoom);
-    void _graphicsViewZoomChange ();
+    void _refreshZoom (float zoom);
+    void _zoomChange ();
 
     void _snapEnabled (bool enable);
 

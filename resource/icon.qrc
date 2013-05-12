@@ -39,11 +39,7 @@
         <file alias="none">icon/other/none.png</file>
     </qresource>
     <qresource prefix="/fugue">
-        <file alias="arrow_up">icon/arrow-090.png</file>
-        <file alias="arrow_down">icon/arrow-270.png</file>
         <file alias="box">icon/box.png</file>
-        <file alias="minus">icon/minus.png</file>
-        <file alias="plus">icon/plus.png</file>
         <file alias="file">icon/document.png</file>
         <file alias="dir">icon/folder-horizontal.png</file>
         <file alias="redo">icon/arrow-curve.png</file>
@@ -51,13 +47,13 @@
         <file alias="save">icon/disk-return-black.png</file>
     </qresource>
     <qresource prefix="/media">
-        <file alias="next">icon/media/arrow.png</file>
-        <file alias="prev">icon/media/arrow-180.png</file>
-        <file alias="play">icon/media/control.png</file>
-        <file alias="pause">icon/media/control-pause.png</file>
-        <file alias="last">icon/media/control-stop.png</file>
-        <file alias="first">icon/media/control-stop-180.png</file>
-        <file alias="stop">icon/media/control-stop-square.png</file>
+        <file alias="prev">icon/media/previous.png</file>
+        <file alias="first">icon/media/first.png</file>
+        <file alias="last">icon/media/last.png</file>
+        <file alias="next">icon/media/next.png</file>
+        <file alias="pause">icon/media/pause.png</file>
+        <file alias="play">icon/media/play.png</file>
+        <file alias="stop">icon/media/stop.png</file>
     </qresource>
     <qresource prefix="/graphics">
         <file alias="grid">icon/graphics/grid.png</file>
@@ -65,5 +61,11 @@
         <file alias="origin_point">icon/graphics/origin_point.png</file>
         <file alias="scene_border">icon/graphics/scene_border.png</file>
         <file alias="snap">icon/graphics/snap_to_grid.png</file>
+    </qresource>
+    <qresource prefix="/menu">
+        <file alias="add">icon/menu/add.png</file>
+        <file alias="remove">icon/menu/remove.png</file>
+        <file alias="up">icon/menu/up.png</file>
+        <file alias="down">icon/menu/down.png</file>
     </qresource>
 </RCC>

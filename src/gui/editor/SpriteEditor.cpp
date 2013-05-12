@@ -188,14 +188,14 @@ void SpriteEditor::_initWidgets ()
     _animationEditor = new SpriteAnimationEditor(_quest);
     _directions = new QListWidget;
     _directionEditor = new SpriteDirectionEditor;
-    _addAnimationButton = new QPushButton(QIcon(":fugue/plus"), "");
-    _removeAnimationButton = new QPushButton(QIcon(":fugue/minus"), "");
+    _addAnimationButton = new QPushButton(QIcon(":menu/add"), "");
+    _removeAnimationButton = new QPushButton(QIcon(":menu/remove"), "");
 
     _animations->setInsertPolicy(QComboBox::NoInsert);
-    _addDirectionButton = new QPushButton(QIcon(":fugue/plus"), "");
-    _removeDirectionButton = new QPushButton(QIcon(":fugue/minus"), "");
-    _upDirectionButton = new QPushButton(QIcon(":fugue/arrow_up"), "");
-    _downDirectionButton = new QPushButton(QIcon(":fugue/arrow_down"), "");
+    _addDirectionButton = new QPushButton(QIcon(":menu/add"), "");
+    _removeDirectionButton = new QPushButton(QIcon(":menu/remove"), "");
+    _upDirectionButton = new QPushButton(QIcon(":menu/up"), "");
+    _downDirectionButton = new QPushButton(QIcon(":menu/down"), "");
 
     _directionPreview = new SpriteDirectionPreview;
 
@@ -473,7 +473,7 @@ void SpriteEditor::_connects ()
     );
     connect(
         _graphicsView, SIGNAL(zoomChange(float)),
-        this, SLOT(_graphicsViewSetZoom(float))
+        this, SLOT(_refreshZoom(float))
     );
     connect(
         _backColor, SIGNAL(colorChange(QColor)),
@@ -481,7 +481,7 @@ void SpriteEditor::_connects ()
     );
     connect(
         _graphicsViewZoom, SIGNAL(currentIndexChanged(int)),
-        this, SLOT(_graphicsViewZoomChange())
+        this, SLOT(_zoomChange())
     );
 }
 
@@ -781,12 +781,12 @@ void SpriteEditor::_redo ()
     _refreshTitle();
 }
 
-void SpriteEditor::_graphicsViewSetZoom (float zoom)
+void SpriteEditor::_refreshZoom (float zoom)
 {
     _graphicsViewZoom->setCurrentIndex(_graphicsViewZoom->findData(zoom));
 }
 
-void SpriteEditor::_graphicsViewZoomChange ()
+void SpriteEditor::_zoomChange ()
 {
     _graphicsView->setZoom(_graphicsViewZoom->itemData(
         _graphicsViewZoom->currentIndex()
