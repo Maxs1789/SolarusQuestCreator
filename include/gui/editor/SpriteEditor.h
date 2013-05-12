@@ -34,13 +34,29 @@ class SpriteAnimationEditor;
 class SpriteDirectionEditor;
 class SpriteDirectionPreview;
 
+/**
+ * @brief Editeur de Sprite.
+ */
 class SpriteEditor : public Editor, public SpriteView
 {
     Q_OBJECT
 public:
+    /**
+     * @brief Constructeur de l'éditeur de Sprite.
+     *
+     * @param quest  La quete dans laquelle se trouve le Sprite
+     * @param sprite Le sprite à éditer
+     */
     SpriteEditor (Quest *quest, const Sprite &sprite);
+    /**
+     * @brief Destructeur de l'éditeur de Sprite.
+     */
     ~SpriteEditor ();
-
+    /**
+     * @brief Donne le Sprite en cours d'édition.
+     *
+     * @return Le Sprite.
+     */
     Sprite *sprite ();
 
     void simpleRefresh (QString message);

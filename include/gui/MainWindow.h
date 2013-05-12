@@ -27,11 +27,20 @@ class SQCTreeWidget;
 class QTreeWidgetItem;
 class Editor;
 
+/**
+ * @brief Fenetre principale de l'application.
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
+    /**
+     * @brief Constructeur de la fenetre principale.
+     */
     MainWindow ();
+    /**
+     * @brief Destructeur de la fenetre principale.
+     */
     ~MainWindow ();
 
 private:

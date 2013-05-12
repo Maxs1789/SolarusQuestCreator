@@ -22,18 +22,46 @@
 
 class QSpinBox;
 
+/**
+ * @brief Editeur de direction d'animation (SpriteDirection).
+ */
 class SpriteDirectionEditor : public QWidget
 {
     Q_OBJECT
 public:
+    /**
+     * @brief Constructeur d'éditeur de direction d'animation.
+     */
     SpriteDirectionEditor ();
-
+    /**
+     * @brief Donne la valeur de la direction d'animation.
+     *
+     * @return La direction d'animation.
+     */
     SpriteDirection direction () const;
-
+    /**
+     * @brief Change la direction d'animation.
+     *
+     * @param direction La nouvelle direction d'animation
+     */
     void setDirection (const SpriteDirection &direction);
 
 signals:
+    /**
+     * @brief Emit lorsque la direction d'animation à terminé un changement.
+     *
+     * @param direction La direction d'animation
+     */
     void directionChange (SpriteDirection direction);
+    /**
+     * @brief Emit à chaque changement direct de la direction.
+     *
+     * Lorsqu'un changement direct est effectué, la direction sauvegardé par
+     * l'éditeur n'est pas affectée, le seul moyen de pouvoir avoir ces derniers
+     * changements est d'utiliser la valeur passée en argument.
+     *
+     * @param direction La direction d'animation
+     */
     void directDirectionChange (SpriteDirection direction);
 
 private:

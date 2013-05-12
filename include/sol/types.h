@@ -144,13 +144,15 @@ struct Color
         return other.red != red || other.green != green || other.blue != blue;
     }
 };
-
+/**
+ * @brief Rectangle.
+ */
 struct Rect
 {
-    int x;
-    int y;
-    int width;
-    int height;
+    int x;       /**< Coordonnée x du rectangle. */
+    int y;       /**< Coordonnée y du rectangle. */
+    int width;   /**< Largeur du rectangle. */
+    int height;  /**< Hauteur du rectangle. */
 };
 
 #endif

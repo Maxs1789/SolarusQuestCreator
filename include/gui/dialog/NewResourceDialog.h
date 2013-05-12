@@ -23,15 +23,39 @@
 class QLineEdit;
 class QDialogButtonBox;
 
+/**
+ * @brief Dialogue de création d'un ressource.
+ */
 class NewResourceDialog : public QDialog
 {
     Q_OBJECT
 public:
+    /**
+     * @brief Constructeur du dialogue.
+     *
+     * @param parent Le widget parent
+     */
     NewResourceDialog (QWidget *parent);
-
+    /**
+     * @brief Donne le nom de la ressource à créer.
+     *
+     * @return Le nom de la ressource à créer.
+     */
     QString name () const;
+    /**
+     * @brief Donne l'identifiant de la ressource à créer.
+     *
+     * @return L'identifiant de la ressource à créer.
+     */
     QString id () const;
-
+    /**
+     * @brief Change la liste des identifiants du type de la ressource à créer.
+     *
+     * Permet au dialogue d'empècher l'utilisateur de donner un identifiant déjà
+     * utilisé.
+     *
+     * @param resourceIds La liste des identifiants
+     */
     void setResourceIds (QList<QString> resourceIds);
 
 private:

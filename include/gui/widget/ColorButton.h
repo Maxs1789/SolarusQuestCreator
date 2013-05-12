@@ -20,10 +20,18 @@
 #include <QPushButton>
 #include <QColorDialog>
 
+/**
+ * @brief Bouton de sélection de couleur.
+ */
 class ColorButton : public QPushButton
 {
     Q_OBJECT
 public:
+    /**
+     * @brief Constructeur de bouton de sélection de couleur.
+     *
+     * @param color La couleur à donner au bouton
+     */
     ColorButton (QColor color = Qt::white) :
         _color(color)
     {
@@ -32,6 +40,11 @@ public:
     }
 
 public slots:
+    /**
+     * @brief change la couleur à donner au bouton.
+     *
+     * @param color La nouvelle couleur à donner au bouton
+     */
     void setColor (QColor color)
     {
         if (color != _color) {
@@ -41,6 +54,9 @@ public slots:
     }
 
 signals:
+    /**
+     * @brief Emit lorsque le bouton change de couleur.
+     */
     void colorChange (QColor);
 
 private:

@@ -47,7 +47,11 @@ public:
      * @return Le nom de la ressource.
      */
     QString name() const;
-
+    /**
+     * @brief Change le nom de la ressource.
+     *
+     * @param name Le nouveau nom de la ressource
+     */
     virtual void setName (QString name) = 0;
 
 protected:

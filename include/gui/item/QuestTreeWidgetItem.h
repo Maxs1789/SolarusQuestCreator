@@ -26,15 +26,29 @@
 #define ROLE_TYPE  QTreeWidgetItem::UserType + 2
 #define ROLE_ID    QTreeWidgetItem::UserType + 3
 
+/**
+ * @brief Item de quete pour une vue en arbre.
+ */
 class QuestTreeWidgetItem : public QTreeWidgetItem, public QuestView
 {
 public:
+    /**
+     * @brief Constructeur de l'item de quete.
+     *
+     * @param quest La quete liée à l'item
+     */
     QuestTreeWidgetItem (Quest *quest);
 
     void refreshResource (ResourceType type, QString id);
     void addResource (ResourceType type, QString id);
     void removeResource (ResourceType type, QString id);
-
+    /**
+     * @brief Change le style de la police utilisé pour le nom de la quete.
+     *
+     * Est utilisé pour identifier la quete courante.
+     *
+     * @param bold Pour mettre la police en gras
+     */
     void setBold (bool bold);
 
 private:

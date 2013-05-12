@@ -31,13 +31,13 @@ public:
      */
     enum Type
     {
-        FILE_EXISTS,
-        FILE_N_EXISTS,
-        FILE_N_READ,
-        FILE_N_WRITE,
-        DIR_EXISTS,
-        DIR_N_EXISTS,
-        DIR_N_WRITE
+        FILE_EXISTS,    /**< Si le fichier existe déjà. */
+        FILE_N_EXISTS,  /**< Si le fichier n'existe pas. */
+        FILE_N_READ,    /**< Si le fichier ne peut etre lu. */
+        FILE_N_WRITE,   /**< Si le fichier ne peut etre écrit. */
+        DIR_EXISTS,     /**< Si le dossier existe déjà. */
+        DIR_N_EXISTS,   /**< Si le dossier n'existe pas. */
+        DIR_N_WRITE     /**< Si le dossier ne peut etre écrit. */
     };
     /**
      * @brief Constructeur de l'exception.

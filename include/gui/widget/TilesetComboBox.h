@@ -20,11 +20,22 @@
 #include <QComboBox>
 #include "view/QuestView.h"
 
+/**
+ * @brief ComboBox listant les tilesets d'une quete (Tileset).
+ */
 class TilesetComboBox : public QComboBox, public QuestView
 {
     Q_OBJECT
 public:
+    /**
+     * @brief Constructeur de la comboBox des tilesets.
+     *
+     * @param quest La quete d'ou récupérer les tilesets
+     */
     TilesetComboBox (Quest *quest);
+    /**
+     * @brief Destructeur de la comboBox.
+     */
     ~TilesetComboBox ();
 
     void refreshResource (ResourceType type, QString id);

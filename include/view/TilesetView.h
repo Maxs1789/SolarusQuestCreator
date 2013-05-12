@@ -28,25 +28,25 @@ public:
     /**
      * @brief Appelée lorsque la sélection du Tileset change.
      *
-     * @param selection La nouvelle sélection du Tileset.
+     * @param selection La nouvelle sélection du Tileset
      */
     virtual void refreshSelection (QList<int> selection) = 0;
     /**
      * @brief Appelée lorsqu'un patron de tile a changé.
      *
-     * @param id L'identifiant du patron de tile.
+     * @param id L'identifiant du patron de tile
      */
     virtual void refreshPattern (int id) = 0;
     /**
      * @brief Appelée lorsque des patrons de tile ont été ajouté.
      *
-     * @param selection La liste des identifiants des nouveaux patron de tile.
+     * @param selection La liste des identifiants des nouveaux patron de tile
      */
     virtual void addPatterns (QList<int> selection) = 0;
     /**
      * @brief Appelée lorsque des patrons de tile ont été supprimé.
      *
-     * @param selection La liste des identifiants de patron de tile supprimé.
+     * @param selection La liste des identifiants de patron de tile supprimé
      */
     virtual void removePatterns (QList<int> selection) = 0;
 };
