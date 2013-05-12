@@ -67,5 +67,6 @@
         <file alias="up">icon/menu/up.png</file>
         <file alias="down">icon/menu/down.png</file>
         <file alias="save">icon/menu/save.png</file>
+        <file alias="option">icon/menu/option.png</file>
     </qresource>
 </RCC>

@@ -38,6 +38,15 @@ public:
         _refresh();
         connect(this, SIGNAL(clicked()), this, SLOT(_onClick()));
     }
+    /**
+     * @brief Donne la couleur du bouton.
+     *
+     * @return La couleur du bouton.
+     */
+    QColor color () const
+    {
+        return _color;
+    }
 
 public slots:
     /**

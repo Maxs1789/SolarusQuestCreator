@@ -93,14 +93,13 @@ private:
     SpriteDirectionPreview *_directionPreview;
     int _animCount;
     QPixmap _currentImage;
-    ColorButton *_selColor;
-    ColorButton *_backColor;
     QComboBox *_graphicsViewZoom;
     QAction *_actionSceneBorder;
     QAction *_actionShowGrid;
     QAction *_actionSnapGrid;
     QSpinBox *_gridWidth;
     QSpinBox *_gridHeight;
+    QAction *_actionOption;
 
     void _initWidgets ();
     void _initToolBar ();
@@ -149,7 +148,7 @@ private slots:
 
     void _snapEnabled (bool enable);
 
-    void _backColorChange (QColor color);
+    void _option ();
 };
 
 #endif

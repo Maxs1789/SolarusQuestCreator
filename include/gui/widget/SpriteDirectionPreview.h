@@ -37,6 +37,8 @@ public:
     void setFrameDelay (const int &frameDelay);
     void setFrameOnLoop (const int &frameOnLoop);
 
+    SpriteDirectionGraphicsView *graphicsView ();
+
 protected:
     void changeEvent (QEvent *event);
 
@@ -58,8 +60,6 @@ private:
     QTimer _timer;
     QAction *_actionOriginPoint;
     QAction *_actionOriginCross;
-    ColorButton *_selColor;
-    ColorButton *_backColor;
 
     void _initWidgets ();
     void _connects ();
@@ -78,7 +78,6 @@ private slots:
 
     void _originPointChange (bool point);
     void _originCrossChange (bool cross);
-    void _backColorChange (QColor color);
 };
 
 #endif

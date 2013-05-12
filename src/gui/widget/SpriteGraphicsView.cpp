@@ -15,6 +15,7 @@
  * limitations under the Licence.
  */
 #include <QGraphicsPixmapItem>
+#include <QSettings>
 #include "gui/widget/SpriteGraphicsView.h"
 #include "sol/SpriteSelection.h"
 #include "sol/SpriteAnimation.h"
@@ -22,12 +23,26 @@
 SpriteGraphicsView::SpriteGraphicsView (QStatusBar *statusBar) :
     SQCGraphicsView(statusBar)
 {
-    setBackgroundBrush(Qt::lightGray);
-    setMouseTracking(true);
-    setShowSceneBorder(true);
-    setGridWidth(16);
-    setGridHeight(16);
+    QSettings s;
+    s.beginGroup("sprite_graphics_view");
+    _showSceneBorder = s.value("show_scene_border", true).toBool();
+    setBackgroundBrush(
+        QColor(s.value("background_color", "#c0c0c0").toString())
+    );
+    setZoom(s.value("zoom", 1.0).toFloat());
+    _snap = s.value("snap_to_grid", true).toBool();
+    _gridW = s.value("grid_width", 16).toInt();
+    _gridH = s.value("grid_height", 16).toInt();
+    _selectionColor = QColor(s.value("selection_color", "#00f").toString());
+    _displaySelectionShadow = s.value(
+        "display_selection_shadow", true
+    ).toBool();
+    _showGrid = s.value("show_grid", false).toBool();
+    _gridColor = QColor(s.value("grid_color", "#888").toString());
+    _gridOpacity = s.value("grid_opacity", 0.5).toFloat();
+    s.endGroup();
     setScene(new QGraphicsScene());
+    setMouseTracking(true);
     _image = new QGraphicsPixmapItem;
     scene()->addItem(_image);
 }
@@ -59,6 +74,24 @@ void SpriteGraphicsView::setSelection (
         keepSelection();
     }
     viewport()->update();
+}
+
+void SpriteGraphicsView::saveSettings () const
+{
+    QSettings s;
+    s.beginGroup("sprite_graphics_view");
+    s.setValue("show_scene_border", _showSceneBorder);
+    s.setValue("background_color", backgroundBrush().color().name());
+    s.setValue("zoom", zoom());
+    s.setValue("snap_to_grid", _snap);
+    s.setValue("grid_width", _gridW);
+    s.setValue("grid_height", _gridH);
+    s.setValue("selection_color", _selectionColor.name());
+    s.setValue("display_selection_shadow", _displaySelectionShadow);
+    s.setValue("show_grid", _showGrid);
+    s.setValue("grid_color", _gridColor.name());
+    s.setValue("grid_opacity", _gridOpacity);
+    s.endGroup();
 }
 
 void SpriteGraphicsView::onSelection (const Rect &selection)

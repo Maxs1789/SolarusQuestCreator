@@ -31,9 +31,12 @@ SQCGraphicsView::SQCGraphicsView (QStatusBar *statusBar) :
     _gridW(8),
     _gridH(8),
     _selectionColor(Qt::blue),
+    _displaySelectionShadow(true),
     _showSceneBorder(false),
     _snap(true),
     _showGrid(false),
+    _gridColor(64, 64, 64),
+    _gridOpacity(0.5),
     _statusBar(statusBar)
 {
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
@@ -59,6 +62,11 @@ QColor SQCGraphicsView::selectionColor () const
     return _selectionColor;
 }
 
+bool SQCGraphicsView::displaySelectionShadow () const
+{
+    return _displaySelectionShadow;
+}
+
 bool SQCGraphicsView::showSceneBorder () const
 {
     return _showSceneBorder;
@@ -67,6 +75,16 @@ bool SQCGraphicsView::showSceneBorder () const
 bool SQCGraphicsView::showGrid () const
 {
     return _showGrid;
+}
+
+QColor SQCGraphicsView::gridColor () const
+{
+    return _gridColor;
+}
+
+float SQCGraphicsView::gridOpacity () const
+{
+    return _gridOpacity;
 }
 
 bool SQCGraphicsView::snap () const
@@ -100,6 +118,16 @@ void SQCGraphicsView::setSelectionColor (QColor color)
     if (color != _selectionColor) {
         _selectionColor = color;
         viewport()->update();
+        emit selectionColorChange(color);
+    }
+}
+
+void SQCGraphicsView::setDisplaySelectionShadow (bool display)
+{
+    if (display != _displaySelectionShadow) {
+        _displaySelectionShadow = display;
+        viewport()->update();
+        emit displaySelectionShadowChange(display);
     }
 }
 
@@ -118,6 +146,29 @@ void SQCGraphicsView::setShowGrid (bool show)
         _showGrid = show;
         viewport()->update();
         emit showGridChange(show);
+    }
+}
+
+void SQCGraphicsView::setGridColor (QColor color)
+{
+    if (color != _gridColor) {
+        _gridColor = color;
+        viewport()->update();
+        emit gridColorChange(color);
+    }
+}
+
+void SQCGraphicsView::setGridOpacity (float opacity)
+{
+    if (opacity > 1.0) {
+        opacity = 1.0;
+    } else if (opacity < 0) {
+        opacity = 0;
+    }
+    if (opacity != _gridOpacity) {
+        _gridOpacity = opacity;
+        viewport()->update();
+        emit gridOpacityChange(opacity);
     }
 }
 
@@ -214,7 +265,9 @@ void SQCGraphicsView::paintEvent (QPaintEvent *event)
         painter.drawRect(polygon.boundingRect().adjusted(-1, -1, 0, 0));
     }
     if (_showGrid) {
-        painter.setPen(QColor(64, 64, 64, 128));
+        QColor gridColor = _gridColor;
+        gridColor.setAlpha(_gridOpacity * 255);
+        painter.setPen(gridColor);
         int w = sceneRect().width(), h = sceneRect().height();
         for (int x = _gridW; x < w; x += _gridW) {
             painter.drawLine(mapFromScene(x, 0), mapFromScene(x, h));
@@ -224,11 +277,13 @@ void SQCGraphicsView::paintEvent (QPaintEvent *event)
         }
     }
     if (_selections.size()) {
-        QColor shadowColor = _selectionColor;
-        shadowColor.setAlpha(85);
-        painter.setPen(shadowColor);
-        for (int i = 0; i < _selections.size(); i++) {
-            _drawComplexSelectionShadow(&painter, _selections[i]);
+        if (_displaySelectionShadow) {
+            QColor shadowColor = _selectionColor;
+            shadowColor.setAlpha(85);
+            painter.setPen(shadowColor);
+            for (int i = 0; i < _selections.size(); i++) {
+                _drawComplexSelectionShadow(&painter, _selections[i]);
+            }
         }
         painter.setPen(_selectionColor);
         for (int i = 0; i < _selections.size(); i++) {

@@ -39,6 +39,7 @@
 #include "gui/dialog/ImageFinder.h"
 #include "gui/widget/SpriteDirectionPreview.h"
 #include "gui/widget/ColorButton.h"
+#include "gui/dialog/SpriteEditorOptionDialog.h"
 
 SpriteEditor::SpriteEditor (Quest *quest, const Sprite &sprite) :
     Editor(quest->directory(), SPRITE, sprite.id()),
@@ -296,8 +297,6 @@ void SpriteEditor::_initToolBar ()
 
     _gridWidth = new QSpinBox;
     _gridHeight = new QSpinBox;
-    _selColor = new ColorButton;
-    _backColor = new ColorButton(Qt::lightGray);
     _graphicsViewZoom = new QComboBox;
 
     _gridWidth->setMinimum(1);
@@ -307,7 +306,6 @@ void SpriteEditor::_initToolBar ()
     _gridHeight->setSingleStep(8);
     _gridHeight->setValue(_graphicsView->gridHeight());
     _snapEnabled(_graphicsView->snap());
-    _selColor->setColor(_graphicsView->selectionColor());
     _graphicsViewZoom->addItem("800%", 8.0);
     _graphicsViewZoom->addItem("400%", 4.0);
     _graphicsViewZoom->addItem("200%", 2.0);
@@ -333,11 +331,10 @@ void SpriteEditor::_initToolBar ()
     toolBar->addWidget(_gridHeight);
     toolBar->addSeparator();
 
-    toolBar->addWidget(_selColor);
-    toolBar->addSeparator();
-    toolBar->addWidget(_backColor);
-    toolBar->addSeparator();
     toolBar->addWidget(_graphicsViewZoom);
+
+    toolBar->addSeparator();
+    _actionOption = toolBar->addAction(QIcon(":menu/option"), "");
 
     toolBar->addWidget(spacer4);
     toolBar->setMovable(false);
@@ -358,8 +355,7 @@ void SpriteEditor::_initToolBar ()
     _actionSnapGrid->setToolTip(tr("Snap to grid"));
     _actionSnapGrid->setCheckable(true);
     _actionSnapGrid->setChecked(_graphicsView->snap());
-    _selColor->setToolTip(tr("Selection color"));
-    _backColor->setToolTip(tr("Background color"));
+    _actionOption->setToolTip(tr("Options"));
 }
 
 void SpriteEditor::_connects ()
@@ -425,10 +421,6 @@ void SpriteEditor::_connects ()
     connect(_actionUndo, SIGNAL(triggered()), this, SLOT(_undo()));
     connect(_actionRedo, SIGNAL(triggered()), this, SLOT(_redo()));
     connect(
-        _selColor, SIGNAL(colorChange(QColor)),
-        _graphicsView, SLOT(setSelectionColor(QColor))
-    );
-    connect(
         _graphicsView, SIGNAL(showSceneBorderChange(bool)),
         _actionSceneBorder, SLOT(setChecked(bool))
     );
@@ -476,13 +468,10 @@ void SpriteEditor::_connects ()
         this, SLOT(_refreshZoom(float))
     );
     connect(
-        _backColor, SIGNAL(colorChange(QColor)),
-        this, SLOT(_backColorChange(QColor))
-    );
-    connect(
         _graphicsViewZoom, SIGNAL(currentIndexChanged(int)),
         this, SLOT(_zoomChange())
     );
+    connect(_actionOption, SIGNAL(triggered()), this, SLOT(_option()));
 }
 
 void SpriteEditor::_firstRefresh ()
@@ -799,7 +788,13 @@ void SpriteEditor::_snapEnabled (bool enable)
     _gridHeight->setEnabled(enable);
 }
 
-void SpriteEditor::_backColorChange (QColor color)
+void SpriteEditor::_option ()
 {
-    _graphicsView->setBackgroundBrush(color);
+    SpriteEditorOptionDialog dialog(
+        _graphicsView, _directionPreview->graphicsView()
+    );
+    int r = dialog.exec();
+    if (r == QDialog::Accepted) {
+        dialog.setSettings();
+    }
 }

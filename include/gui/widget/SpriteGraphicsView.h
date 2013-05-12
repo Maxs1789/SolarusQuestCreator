@@ -30,6 +30,8 @@ public:
         const SpriteAnimation &animation, const SpriteSelection &selection
     );
 
+    void saveSettings () const;
+
 signals:
     void newSelection (Rect);
 

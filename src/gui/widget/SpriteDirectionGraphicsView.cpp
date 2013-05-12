@@ -14,15 +14,24 @@
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
+#include <QSettings>
 #include "gui/widget/SpriteDirectionGraphicsView.h"
 
 SpriteDirectionGraphicsView::SpriteDirectionGraphicsView () :
-    _showOrigin(true),
-    _cross(true),
     _originX(0),
     _originY(0)
 {
-    setSelectionColor(Qt::white);
+    QSettings s;
+    s.beginGroup("sprite_direction_graphics_view");
+    _selectionColor = QColor(s.value("origin_color", "#fff").toString());
+    setZoom(s.value("zoom", 2.0).toFloat());
+    setBackgroundBrush(
+        QColor(s.value("background_color", "#c0c0c0").toString())
+    );
+    _showOrigin = s.value("show_origin", true).toBool();
+    _cross = s.value("origin_mode", true).toBool();
+    s.endGroup();
+    setScene(new QGraphicsScene());
 }
 
 bool SpriteDirectionGraphicsView::showOrigin () const
@@ -47,6 +56,18 @@ void SpriteDirectionGraphicsView::setOrigin (int originX, int originY)
         _originY = originY;
         viewport()->update();
     }
+}
+
+void SpriteDirectionGraphicsView::saveSettings () const
+{
+    QSettings s;
+    s.beginGroup("sprite_direction_graphics_view");
+    s.setValue("origin_color", _selectionColor.name());
+    s.setValue("zoom", zoom());
+    s.setValue("background_color", backgroundBrush().color().name());
+    s.setValue("show_origin", _showOrigin);
+    s.setValue("origin_mode", _cross);
+    s.endGroup();
 }
 
 void SpriteDirectionGraphicsView::showOrigin (bool show)

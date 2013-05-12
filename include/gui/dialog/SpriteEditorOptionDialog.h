@@ -14,40 +14,32 @@
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
-#ifndef SPRITE_DIRECTION_GRAPHICS_VIEW_H
-#define SPRITE_DIRECTION_GRAPHICS_VIEW_H
+#ifndef SPRITE_EDITOR_OPTION_DIALOG_H
+#define SPRITE_EDITOR_OPTION_DIALOG_H
 
-#include "SQCGraphicsView.h"
+#include <QDialog>
 
-class SpriteDirectionGraphicsView : public SQCGraphicsView
+class QDialogButtonBox;
+class SpriteGraphicsView;
+class SpriteDirectionGraphicsView;
+class SpriteGraphicsViewOption;
+class SpritePreviewOption;
+
+class SpriteEditorOptionDialog : public QDialog
 {
     Q_OBJECT
 public:
-    SpriteDirectionGraphicsView ();
+    SpriteEditorOptionDialog (
+        SpriteGraphicsView *mainView,
+        SpriteDirectionGraphicsView *directionPreview
+    );
 
-    bool showOrigin () const;
-    bool point () const;
-    bool cross () const;
-
-    void setOrigin (int originX, int originY);
-
-    void saveSettings () const;
-
-public slots:
-    void showOrigin (bool show);
-    void showOriginPoint (bool point);
-    void showOriginCross (bool cross);
-
-signals:
-    void showOriginChange (bool show, bool cross);
-
-protected:
-    void paintEvent (QPaintEvent *event);
+    void setSettings ();
 
 private:
-    bool _showOrigin;
-    bool _cross;
-    int _originX, _originY;
+    SpriteGraphicsViewOption *_mainOption;
+    SpritePreviewOption *_previewOption;
+    QDialogButtonBox *_buttonBox;
 };
 
 #endif

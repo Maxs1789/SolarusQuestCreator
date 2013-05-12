@@ -21,6 +21,11 @@
 int main (int argc, char** argv)
 {
     try {
+        QCoreApplication::setOrganizationName("Maxs1789");
+        QCoreApplication::setOrganizationDomain(
+            "github.com/Maxs1789/SolarusQuestCreator"
+        );
+        QCoreApplication::setApplicationName("Solarus Quest Creator");
         QApplication app(argc, argv);
         MainWindow win;
         win.show();

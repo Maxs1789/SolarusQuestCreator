@@ -59,6 +59,11 @@ void SpriteDirectionPreview::setFrameOnLoop (const int &frameOnLoop)
     _frameOnLoop = frameOnLoop;
 }
 
+SpriteDirectionGraphicsView *SpriteDirectionPreview::graphicsView ()
+{
+    return _graphicsView;
+}
+
 void SpriteDirectionPreview::changeEvent (QEvent *event)
 {
     if (event->type() == QEvent::EnabledChange && isEnabled() == false) {
@@ -79,15 +84,11 @@ void SpriteDirectionPreview::_initWidgets ()
     _stop = new QPushButton(QIcon(":media/stop"), "");
     _first = new QPushButton(QIcon(":media/first"), "");
     _last = new QPushButton(QIcon(":media/last"), "");
-    _backColor = new ColorButton(Qt::lightGray);
-    _selColor = new ColorButton(_graphicsView->selectionColor());
 
     _frame->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     _frame->setLineWidth(1);
     _frame->setAlignment(Qt::AlignCenter);
-    _frame->setMargin(3);
-    _graphicsView->setScene(new QGraphicsScene());
-    _graphicsView->setBackgroundBrush(Qt::lightGray);
+    _frame->setMinimumWidth(64);
     _play->setMaximumSize(24, 24);
     _next->setToolTip(tr("Next frame"));
     _next->setMaximumSize(24, 24);
@@ -99,8 +100,6 @@ void SpriteDirectionPreview::_initWidgets ()
     _first->setMaximumSize(24, 24);
     _last->setToolTip(tr("Last frame"));
     _last->setMaximumSize(24, 24);
-    _backColor->setToolTip(tr("Background color"));
-    _selColor->setToolTip(tr("Selection color"));
 
     QHBoxLayout *buttonLayout = new QHBoxLayout;
     buttonLayout->addWidget(_play);
@@ -118,10 +117,6 @@ void SpriteDirectionPreview::_initWidgets ()
     _actionOriginCross = toolBar->addAction(
         QIcon(":/graphics/origin_cross"), ""
     );
-    toolBar->addSeparator();
-    toolBar->addWidget(_selColor);
-    toolBar->addSeparator();
-    toolBar->addWidget(_backColor);
     _actionOriginPoint->setToolTip(tr("Origin point"));
     _actionOriginPoint->setCheckable(true);
     _actionOriginPoint->setChecked(_graphicsView->point());
@@ -158,14 +153,6 @@ void SpriteDirectionPreview::_connects ()
     connect(
         _actionOriginCross, SIGNAL(toggled(bool)),
         this, SLOT(_originCrossChange(bool))
-    );
-    connect(
-        _selColor, SIGNAL(colorChange(QColor)),
-        _graphicsView, SLOT(setSelectionColor(QColor))
-    );
-    connect(
-        _backColor, SIGNAL(colorChange(QColor)),
-        this, SLOT(_backColorChange(QColor))
     );
 }
 
@@ -282,9 +269,4 @@ void SpriteDirectionPreview::_originCrossChange (bool cross)
     } else {
         _graphicsView->showOrigin(false);
     }
-}
-
-void SpriteDirectionPreview::_backColorChange (QColor color)
-{
-    _graphicsView->setBackgroundBrush(color);
 }

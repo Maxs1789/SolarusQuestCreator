@@ -14,40 +14,38 @@
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
-#ifndef SPRITE_DIRECTION_GRAPHICS_VIEW_H
-#define SPRITE_DIRECTION_GRAPHICS_VIEW_H
+#ifndef SPRITE_PREVIEW_OPTION_H
+#define SPRITE_PREVIEW_OPTION_H
 
-#include "SQCGraphicsView.h"
+#include <QWidget>
 
-class SpriteDirectionGraphicsView : public SQCGraphicsView
+class QCheckBox;
+class QComboBox;
+class QGroupBox;
+class SpriteDirectionGraphicsView;
+class ColorButton;
+
+class SpritePreviewOption : public QWidget
 {
     Q_OBJECT
 public:
-    SpriteDirectionGraphicsView ();
+    SpritePreviewOption (SpriteDirectionGraphicsView *view = 0);
+    ~SpritePreviewOption ();
 
-    bool showOrigin () const;
-    bool point () const;
-    bool cross () const;
-
-    void setOrigin (int originX, int originY);
-
-    void saveSettings () const;
-
-public slots:
-    void showOrigin (bool show);
-    void showOriginPoint (bool point);
-    void showOriginCross (bool cross);
-
-signals:
-    void showOriginChange (bool show, bool cross);
-
-protected:
-    void paintEvent (QPaintEvent *event);
+    void setSettings ();
+    void save ();
 
 private:
-    bool _showOrigin;
-    bool _cross;
-    int _originX, _originY;
+    SpriteDirectionGraphicsView *_view;
+    bool _mustDelete;
+    ColorButton *_backColor;
+    QComboBox *_zoom;
+    QGroupBox *_originGroup;
+    ColorButton *_originColor;
+    QComboBox *_originMode;
+
+    void _initWidgets ();
+    void _refreshWidgets (const SpriteDirectionGraphicsView *view);
 };
 
 #endif
