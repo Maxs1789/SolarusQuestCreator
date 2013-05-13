@@ -4,9 +4,6 @@ project(SolarusQuestCreator)
 set(CMAKE_AUTOMOC ON)
 # Dependances
 find_package(Qt5Core)
-# J'utilise en fait Lua 5.2 mais CMake ne le trouve pas sur mon système !
-# Il faut donc modifier le cache a la main pour le moment ...
-# -DLUA_INCLUDE_DIR=/usr/include -DLUA_LIBRARY=/usr/lib64/liblua.so
 find_package(Lua51 REQUIRED)
 # Sources
 file(
