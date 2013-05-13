@@ -42,8 +42,8 @@ private:
     QCheckBox *_showSceneBorder;
     ColorButton *_backColor;
     QComboBox *_zoom;
-    QGroupBox *_gridStyleGroup;
-    QGroupBox *_gridSnapGroup;
+    QGroupBox *_showGrid;
+    QCheckBox *_snap;
     ColorButton *_gridColor;
     QSpinBox *_gridOpacity;
     QSpinBox *_gridWidth;

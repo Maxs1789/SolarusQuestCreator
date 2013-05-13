@@ -51,10 +51,10 @@ void SpriteGraphicsViewOption::setSettings ()
     _view->setShowSceneBorder(_showSceneBorder->isChecked());
     _view->setBackgroundBrush(_backColor->color());
     _view->setZoom(_zoom->itemData(_zoom->currentIndex()).toFloat());
-    _view->setShowGrid(_gridStyleGroup->isChecked());
-    _view->setSnap(_gridSnapGroup->isChecked());
+    _view->setShowGrid(_showGrid->isChecked());
+    _view->setSnap(_snap->isChecked());
     _view->setGridColor(_gridColor->color());
-    _view->setGridOpacity(_gridOpacity->value() / 100);
+    _view->setGridOpacity((float)_gridOpacity->value() / 100);
     _view->setGridWidth(_gridWidth->value());
     _view->setGridHeight(_gridHeight->value());
     _view->setDisplaySelectionShadow(_displaySelectionShadow->isChecked());
@@ -71,8 +71,8 @@ void SpriteGraphicsViewOption::_initWidgets ()
     _showSceneBorder = new QCheckBox(tr("Show scene border"));
     _backColor = new ColorButton;
     _zoom = new QComboBox;
-    _gridStyleGroup = new QGroupBox(tr("Show grid"));
-    _gridSnapGroup = new QGroupBox(tr("Snap to grid"));
+    _showGrid = new QGroupBox(tr("Show grid"));
+    _snap = new QCheckBox(tr("Snap to grid"));
     _gridColor = new ColorButton;
     _gridOpacity = new QSpinBox;
     _gridWidth = new QSpinBox;
@@ -86,10 +86,9 @@ void SpriteGraphicsViewOption::_initWidgets ()
     _zoom->addItem("100%", 1.0);
     _zoom->addItem("50%", 0.5);
     _zoom->addItem("25%", 0.25);
-    _gridStyleGroup->setFlat(true);
-    _gridStyleGroup->setCheckable(true);
-    _gridSnapGroup->setFlat(true);
-    _gridSnapGroup->setCheckable(true);
+    _showGrid->setStyleSheet("QGroupBox::title{font-bold:false}");
+    _showGrid->setFlat(true);
+    _showGrid->setCheckable(true);
     _gridOpacity->setMaximum(100);
     _gridOpacity->setSuffix("%");
     _gridWidth->setMinimum(1);
@@ -102,13 +101,20 @@ void SpriteGraphicsViewOption::_initWidgets ()
     styleLayout->addRow(tr("Opacity:"), _gridOpacity);
     styleLayout->setAlignment(_gridColor, Qt::AlignCenter);
     styleLayout->setLabelAlignment(Qt::AlignRight);
-    _gridStyleGroup->setLayout(styleLayout);
+    _showGrid->setLayout(styleLayout);
 
-    QFormLayout *snapLayout = new QFormLayout;
-    snapLayout->addRow(tr("Width:"), _gridWidth);
-    snapLayout->addRow(tr("Height:"), _gridHeight);
-    snapLayout->setLabelAlignment(Qt::AlignRight);
-    _gridSnapGroup->setLayout(snapLayout);
+    QGroupBox *gridGroup = new QGroupBox(tr("Grid"));
+    QGridLayout *gridLayout = new QGridLayout;
+    gridLayout->addWidget(_snap, 0, 0, 1, 2, Qt::AlignCenter);
+    gridLayout->addWidget(new QLabel(tr("Width:")), 1, 0, 1, 1, Qt::AlignRight);
+    gridLayout->addWidget(_gridWidth, 1, 1);
+    gridLayout->addWidget(
+        new QLabel(tr("Height:")), 2, 0, 1, 1, Qt::AlignRight
+    );
+    gridLayout->addWidget(_gridHeight, 2, 1);
+    gridLayout->addWidget(_showGrid, 0, 3, 3, 1);
+    gridLayout->setColumnMinimumWidth(2, 15);
+    gridGroup->setLayout(gridLayout);
 
     QGridLayout *layout = new QGridLayout;
     layout->addWidget(_showSceneBorder, 0, 0, 1, 2, Qt::AlignCenter);
@@ -120,14 +126,12 @@ void SpriteGraphicsViewOption::_initWidgets ()
         new QLabel(tr("Zoom:")), 2, 0, 1, 1, Qt::AlignRight
     );
     layout->addWidget(_zoom, 2, 1);
-    layout->addWidget(_gridSnapGroup, 3, 0, 1, 2);
-
     layout->addWidget(
         new QLabel(tr("Selection color:")), 0, 3, 1, 1, Qt::AlignRight
     );
     layout->addWidget(_selectionColor, 0, 4);
     layout->addWidget(_displaySelectionShadow, 1, 3, 1, 2, Qt::AlignCenter);
-    layout->addWidget(_gridStyleGroup, 3, 3, 1, 2);
+    layout->addWidget(gridGroup, 3, 0, 1, 5, Qt::AlignCenter);
     layout->setColumnMinimumWidth(2, 15);
     setLayout(layout);
 }
@@ -137,8 +141,8 @@ void SpriteGraphicsViewOption::_refreshWidgets (const SpriteGraphicsView *view)
     _showSceneBorder->setChecked(view->showSceneBorder());
     _backColor->setColor(view->backgroundBrush().color());
     _zoom->setCurrentIndex(_zoom->findData(view->zoom()));
-    _gridStyleGroup->setChecked(view->showGrid());
-    _gridSnapGroup->setChecked(view->snap());
+    _showGrid->setChecked(view->showGrid());
+    _snap->setChecked(view->snap());
     _gridColor->setColor(view->gridColor());
     _gridOpacity->setValue(view->gridOpacity() * 100);
     _gridWidth->setValue(view->gridWidth());

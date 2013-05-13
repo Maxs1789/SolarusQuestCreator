@@ -76,6 +76,8 @@ private slots:
 
     void _step ();
 
+    void _refreshShowOrigin (bool show, bool cross);
+
     void _originPointChange (bool point);
     void _originCrossChange (bool cross);
 };

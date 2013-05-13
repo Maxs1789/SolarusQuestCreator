@@ -73,6 +73,7 @@ void SpritePreviewOption::_initWidgets ()
     _zoom->addItem("100%", 1.0);
     _zoom->addItem("50%", 0.5);
     _zoom->addItem("25%", 0.25);
+    _originGroup->setStyleSheet("QGroupBox::title{font-bold:false}");
     _originGroup->setFlat(true);
     _originGroup->setCheckable(true);
     _originMode->addItem(tr("point"), false);

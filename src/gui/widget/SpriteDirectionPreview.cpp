@@ -154,6 +154,10 @@ void SpriteDirectionPreview::_connects ()
         _actionOriginCross, SIGNAL(toggled(bool)),
         this, SLOT(_originCrossChange(bool))
     );
+    connect(
+        _graphicsView, SIGNAL(showOriginChange(bool,bool)),
+        this, SLOT(_refreshShowOrigin(bool,bool))
+    );
 }
 
 void SpriteDirectionPreview::_refreshView ()
@@ -245,6 +249,16 @@ void SpriteDirectionPreview::_step ()
         }
     }
     _refreshView();
+}
+
+void SpriteDirectionPreview::_refreshShowOrigin (bool show, bool cross)
+{
+    _actionOriginCross->blockSignals(true);
+    _actionOriginPoint->blockSignals(true);
+    _actionOriginCross->setChecked(show && cross);
+    _actionOriginPoint->setChecked(show && !cross);
+    _actionOriginCross->blockSignals(false);
+    _actionOriginPoint->blockSignals(false);
 }
 
 void SpriteDirectionPreview::_originPointChange (bool point)

@@ -145,9 +145,6 @@ private slots:
 
     void _refreshZoom (float zoom);
     void _zoomChange ();
-
-    void _snapEnabled (bool enable);
-
     void _option ();
 };
 

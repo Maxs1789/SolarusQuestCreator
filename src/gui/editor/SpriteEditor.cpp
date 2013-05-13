@@ -305,7 +305,6 @@ void SpriteEditor::_initToolBar ()
     _gridHeight->setMinimum(1);
     _gridHeight->setSingleStep(8);
     _gridHeight->setValue(_graphicsView->gridHeight());
-    _snapEnabled(_graphicsView->snap());
     _graphicsViewZoom->addItem("800%", 8.0);
     _graphicsViewZoom->addItem("400%", 4.0);
     _graphicsViewZoom->addItem("200%", 2.0);
@@ -320,9 +319,11 @@ void SpriteEditor::_initToolBar ()
     _actionSceneBorder = toolBar->addAction(
         QIcon(":graphics/scene_border"), ""
     );
+    toolBar->addSeparator();
     _actionShowGrid = toolBar->addAction(QIcon(":graphics/grid"), "");
     toolBar->addSeparator();
     _actionSnapGrid = toolBar->addAction(QIcon(":graphics/snap"), "");
+    toolBar->addSeparator();
     toolBar->addWidget(spacer2);
     toolBar->addWidget(new QLabel(tr("Width:")));
     toolBar->addWidget(_gridWidth);
@@ -439,9 +440,6 @@ void SpriteEditor::_connects ()
     connect(
         _graphicsView, SIGNAL(snapChange(bool)),
         _actionSnapGrid, SLOT(setChecked(bool))
-    );
-    connect(
-        _graphicsView, SIGNAL(snapChange(bool)), this, SLOT(_snapEnabled(bool))
     );
     connect(
         _actionSnapGrid, SIGNAL(toggled(bool)),
@@ -780,12 +778,6 @@ void SpriteEditor::_zoomChange ()
     _graphicsView->setZoom(_graphicsViewZoom->itemData(
         _graphicsViewZoom->currentIndex()
     ).toFloat());
-}
-
-void SpriteEditor::_snapEnabled (bool enable)
-{
-    _gridWidth->setEnabled(enable);
-    _gridHeight->setEnabled(enable);
 }
 
 void SpriteEditor::_option ()
