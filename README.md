@@ -9,7 +9,7 @@ Dépendances
 -----------
 
 * **Qt5**    - Librairie principale, utilisée pour l'interface graphique
-* **Lua5.2** - Utilisée pour charger certains fichiers de quête
+* **Lua5.1** - Utilisée pour charger certains fichiers de quête
 
 Compiler
 --------
@@ -25,13 +25,6 @@ pas déjà, et entrer les commandes :
     $ cd ./SolarusQuestCreator
     $ cmake
     $ make
-
-Il est possible que **CMake** rencontre des problèmes pour trouver **Lua5.2**
-car il en a sur mon système ! Si c'est le cas chez vous, localisez l'emplacement
-de la bibliothèque et des fichiers d'entête; puis essayer avec la commande :
-
-    $ cmake -DLUA_INCLUDE_DIR=/chemin/des/entetes \
-            -DLUA_LIBRARY=/chemin/de/la/bibliotheque
 
 License
 -------
