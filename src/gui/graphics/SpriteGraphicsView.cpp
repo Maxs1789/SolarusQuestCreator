@@ -16,7 +16,7 @@
  */
 #include <QGraphicsPixmapItem>
 #include <QSettings>
-#include "gui/widget/SpriteGraphicsView.h"
+#include "gui/graphics/SpriteGraphicsView.h"
 #include "sol/SpriteSelection.h"
 #include "sol/SpriteAnimation.h"
 

@@ -30,7 +30,7 @@
 #include <QSplitter>
 #include <QSpinBox>
 #include <QStatusBar>
-#include "gui/widget/SpriteGraphicsView.h"
+#include "gui/graphics/SpriteGraphicsView.h"
 #include "gui/editor/SpriteEditor.h"
 #include "gui/editor/SpriteAnimationEditor.h"
 #include "gui/editor/SpriteDirectionEditor.h"
@@ -299,10 +299,10 @@ void SpriteEditor::_initToolBar ()
     _gridHeight = new QSpinBox;
     _graphicsViewZoom = new QComboBox;
 
-    _gridWidth->setMinimum(1);
+    _gridWidth->setRange(1, 9999);
     _gridWidth->setSingleStep(8);
     _gridWidth->setValue(_graphicsView->gridWidth());
-    _gridHeight->setMinimum(1);
+    _gridHeight->setRange(1, 9999);
     _gridHeight->setSingleStep(8);
     _gridHeight->setValue(_graphicsView->gridHeight());
     _graphicsViewZoom->addItem("800%", 8.0);

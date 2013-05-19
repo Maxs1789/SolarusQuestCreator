@@ -22,7 +22,7 @@
 #include <QToolBar>
 #include <QAction>
 #include "gui/widget/SpriteDirectionPreview.h"
-#include "gui/widget/SpriteDirectionGraphicsView.h"
+#include "gui/graphics/SpriteDirectionGraphicsView.h"
 #include "gui/widget/ColorButton.h"
 
 SpriteDirectionPreview::SpriteDirectionPreview () :

@@ -22,7 +22,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include "gui/option/SpriteGraphicsViewOption.h"
-#include "gui/widget/SpriteGraphicsView.h"
+#include "gui/graphics/SpriteGraphicsView.h"
 #include "gui/widget/ColorButton.h"
 
 SpriteGraphicsViewOption::SpriteGraphicsViewOption (

@@ -19,7 +19,7 @@
 #include <QGroupBox>
 #include <QFormLayout>
 #include "gui/option/SpritePreviewOption.h"
-#include "gui/widget/SpriteDirectionGraphicsView.h"
+#include "gui/graphics/SpriteDirectionGraphicsView.h"
 #include "gui/widget/ColorButton.h"
 
 SpritePreviewOption::SpritePreviewOption (SpriteDirectionGraphicsView *view) :

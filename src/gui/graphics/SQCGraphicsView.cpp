@@ -17,7 +17,7 @@
 #include <QKeyEvent>
 #include <QWheelEvent>
 #include <QStatusBar>
-#include "gui/widget/SQCGraphicsView.h"
+#include "gui/graphics/SQCGraphicsView.h"
 
 SQCGraphicsView::SQCGraphicsView (QStatusBar *statusBar) :
     _zoom(1.0),

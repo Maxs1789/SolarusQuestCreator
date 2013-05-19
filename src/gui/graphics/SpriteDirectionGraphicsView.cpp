@@ -15,7 +15,7 @@
  * limitations under the Licence.
  */
 #include <QSettings>
-#include "gui/widget/SpriteDirectionGraphicsView.h"
+#include "gui/graphics/SpriteDirectionGraphicsView.h"
 
 SpriteDirectionGraphicsView::SpriteDirectionGraphicsView () :
     _originX(0),
